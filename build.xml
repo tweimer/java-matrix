@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- Build file for JAMA -->
+<project name="JAMA" basedir="." default="all">
+    <target name="clean">
+        <delete dir="bin"/>
+        <delete dir="jar"/>
+    </target>
+
+    <target name="doc">
+        <mkdir dir="doc" />
+        <javadoc access="public" author="true" classpath="." sourcepath="src" destdir="doc" doctitle="JAMA : A Java Matrix Package"
+            nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false"
+            packagenames="jama2.util,jama2.examples,jama2.test,jama2" source="1.7" splitindex="true" use="true" version="true" />
+    </target>
+    
+    
+    <target name="compile">
+        <mkdir dir="bin" />
+        <javac srcdir="src" destdir="bin" includeantruntime="false" target="1.8" verbose="no" listfiles="no"/>
+    </target>
+    
+     <target name="jar" depends="compile">
+        <mkdir dir="jar" />
+        <jar destfile="jar/Jama.jar" basedir="bin">
+        </jar>
+    </target>
+    
+    <target name="all" depends="clean,jar" />
+</project>
