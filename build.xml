@@ -2,6 +2,8 @@
 
 <!-- Build file for JAMA -->
 <project name="JAMA" basedir="." default="all">
+  <property name="version" value="2.0"/>
+
     <target name="clean">
         <delete dir="bin"/>
         <delete dir="jar"/>
@@ -27,4 +29,8 @@
     </target>
     
     <target name="all" depends="clean,jar" />
+    
+    <target name="release" depends="jar">
+        <tar basedir="jar" destfile="Jama-${version}.tar" compression="none" />
+    </target>
 </project>

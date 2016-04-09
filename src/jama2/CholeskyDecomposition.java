@@ -15,8 +15,8 @@ import java.io.Serializable;
  * 
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
- * @version 8. Februar 2016
- * @see http://math.nist.gov/javanumerics/jama/
+ * @version 2.0
+ * @see http://tweimer.github.io/jama/
  */
 public class CholeskyDecomposition implements Serializable
 {

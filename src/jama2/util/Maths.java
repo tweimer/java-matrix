@@ -7,8 +7,8 @@ import static java.lang.Math.sqrt;
  * 
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
- * @version 8. Februar 2016
- * @see http://math.nist.gov/javanumerics/jama/
+ * @version 2.0
+ * @see http://tweimer.github.io/jama/
  */
 public class Maths
 {
@@ -44,6 +44,7 @@ public class Maths
     }
 
     /**
+     * sqrt(p^2+q^2+r^2)
      * 
      * @param p
      * @param q
@@ -56,6 +57,7 @@ public class Maths
     }
 
     /**
+     * abs(p)+abs(q)+abs(r)
      * 
      * @param p
      * @param q
