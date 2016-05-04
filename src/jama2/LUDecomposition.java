@@ -1,6 +1,7 @@
 package jama2;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * LU Decomposition.
@@ -20,10 +21,14 @@ import java.io.Serializable;
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
- * @see http://tweimer.github.io/jama/
+ * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
 public class LUDecomposition implements Serializable
 {
+    /**
+     * For the Serializeable interface
+     */
+    private static final long serialVersionUID = 1;
 
     /**
      * Array for internal storage of decomposition.
@@ -33,18 +38,19 @@ public class LUDecomposition implements Serializable
     private final double[][] LU;
 
     /**
-     * Row and column dimensions, and pivot sign.
+     * Row and column dimensions.
      * 
      * @serial column dimension.
      * @serial row dimension.
-     * @serial pivot sign.
      */
     private final int m, n;
 
     /**
+     * pivot sign
      * 
+     * @serial pivot sign.
      */
-    private int pivsign;
+    private int pivsign = 1;
 
     /**
      * Internal storage of pivot vector.
@@ -52,11 +58,6 @@ public class LUDecomposition implements Serializable
      * @serial pivot vector.
      */
     private final int piv[];
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1;
 
     /* ------------------------
        Temporary, experimental code.
@@ -88,7 +89,6 @@ public class LUDecomposition implements Serializable
     //        {
     //            this.piv[i] = i;
     //        }
-    //        this.pivsign = 1;
     //        // Main loop.
     //        for (int k = 0; k < this.n; k++)
     //        {
@@ -155,7 +155,6 @@ public class LUDecomposition implements Serializable
         {
             this.piv[i] = i;
         }
-        this.pivsign = 1;
 
         // Outer loop.
         for (int j = 0; j < this.n; j++)
@@ -195,13 +194,10 @@ public class LUDecomposition implements Serializable
 
             if (p != j)
             {
-                for (int k = 0; k < this.n; k++)
-                {
-                    // Swap this.LU[p][k] and this.LU[j][k]
-                    final double t = this.LU[p][k];
-                    this.LU[p][k] = this.LU[j][k];
-                    this.LU[j][k] = t;
-                }
+                // Swap this.LU[p][k] and this.LU[j][k]
+                final double row_p[] = this.LU[p];
+                this.LU[p] = this.LU[j];
+                this.LU[j] = row_p;
 
                 // swap piv[p] and piv[j]
                 final int k = this.piv[p];
@@ -224,11 +220,9 @@ public class LUDecomposition implements Serializable
     }
 
     /**
-     * Determinant
+     * Determinant of a square matrix
      * 
-     * @return det(A)
-     * @exception IllegalArgumentException
-     *                Matrix must be square
+     * @return det(A)for square matrices, NaN otherwise
      */
     public double det()
     {
@@ -244,7 +238,8 @@ public class LUDecomposition implements Serializable
         }
         else
         {
-            throw new IllegalArgumentException("Matrix must be square."); //$NON-NLS-1$
+            return Double.NaN;
+            //throw new IllegalArgumentException("Matrix must be square."); //$NON-NLS-1$
         }
     }
 
@@ -289,12 +284,7 @@ public class LUDecomposition implements Serializable
      */
     public int[] getPivot()
     {
-        final int p[] = new int[this.m];
-        for (int i = 0; i < this.m; i++)
-        {
-            p[i] = this.piv[i];
-        }
-        return p;
+        return Arrays.copyOf(this.piv, this.m);
     }
 
     /**
@@ -304,7 +294,7 @@ public class LUDecomposition implements Serializable
      */
     public Matrix getU()
     {
-        final Matrix X = new Matrix(this.n, this.n);
+        final Matrix X = new Matrix(this.n);
         final double[][] U = X.getArray();
         for (int i = 0; i < this.n; i++)
         {

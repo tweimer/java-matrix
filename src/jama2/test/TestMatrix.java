@@ -60,7 +60,7 @@ import static jama2.util.Maths.eps;
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
- * @see http://tweimer.github.io/jama/
+ * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  **/
 public class TestMatrix
 {

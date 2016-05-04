@@ -14,8 +14,6 @@ import java.util.Random;
 import java.util.Vector;
 
 import static jama2.util.Maths.hypot;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import static java.lang.Math.abs;
 
 /**
@@ -66,14 +64,14 @@ import static java.lang.Math.abs;
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
- * @see http://tweimer.github.io/jama/
+ * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
 public class Matrix implements Serializable
 {
     /**
-     * 
+     * For the Serializeable interface
      */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1;
 
     /**
      * Construct a matrix from a copy of a 2-D array.
@@ -524,6 +522,7 @@ public class Matrix implements Serializable
      * @param B
      *            another matrix
      * @return A.*B
+     * @see #arrayTimesEquals
      */
     public Matrix arrayTimes(final Matrix B)
     {
@@ -544,6 +543,7 @@ public class Matrix implements Serializable
      * 
      * @param B
      *            another matrix
+     * @see #arrayTimes
      */
     public void arrayTimesEquals(final Matrix B)
     {
@@ -587,6 +587,7 @@ public class Matrix implements Serializable
      * Matrix condition (2 norm)
      * 
      * @return ratio of largest to smallest singular value.
+     * @see SingularValueDecomposition#cond()
      */
     public double cond()
     {
@@ -597,7 +598,7 @@ public class Matrix implements Serializable
      * Returns a copy of the matrix
      * 
      * @return copy of this Matrix
-     * @deprecated use the appropriate constructor
+     * @deprecated use {@link #Matrix(Matrix)}
      */
     @Deprecated
     public Matrix copy()
@@ -665,6 +666,7 @@ public class Matrix implements Serializable
      *            Column index.
      * @return A(i,j)
      * @throws ArrayIndexOutOfBoundsException
+     *             if indices are invalid
      */
     public double get(final int i, final int j)
     {
@@ -688,13 +690,10 @@ public class Matrix implements Serializable
      */
     public double[][] getArrayCopy()
     {
-        final double C[][] = new double[this.m][this.n];
-        for (int i = 0; i < this.A.length; i++)
+        final double C[][] = new double[this.A.length][];
+        for (int i = 0; i < C.length; i++)
         {
-            for (int j = 0; j < this.A[i].length; j++)
-            {
-                C[i][j] = this.A[i][j];
-            }
+            C[i] = Arrays.copyOf(this.A[i], this.A[i].length);
         }
         return C;
     }
@@ -893,6 +892,7 @@ public class Matrix implements Serializable
      * Matrix inverse or pseudoinverse
      * 
      * @return inverse(A) if A is square, pseudoinverse otherwise.
+     * @see #solve
      */
     public Matrix inverse()
     {
@@ -917,7 +917,8 @@ public class Matrix implements Serializable
      * 
      * @param B
      *            another matrix
-     * @return A - B
+     * @return new Matrix A - B
+     * @see #minusEquals
      */
     public Matrix minus(final Matrix B)
     {
@@ -938,6 +939,7 @@ public class Matrix implements Serializable
      * 
      * @param B
      *            another matrix
+     * @see #minus
      */
     public void minusEquals(final Matrix B)
     {
@@ -1030,7 +1032,8 @@ public class Matrix implements Serializable
      * 
      * @param B
      *            another matrix
-     * @return A + B
+     * @return new Matrix A + B
+     * @see #plusEquals
      */
     public Matrix plus(final Matrix B)
     {
@@ -1051,6 +1054,7 @@ public class Matrix implements Serializable
      * 
      * @param B
      *            another matrix
+     * @see #plus
      */
     public void plusEquals(final Matrix B)
     {
@@ -1108,7 +1112,7 @@ public class Matrix implements Serializable
                 // format the number
                 final String s = format.format(d);
                 // At _least_ 1 space
-                final int padding = max(1, width - s.length());
+                final int padding = (width > s.length()) ? width - s.length() : 1;
                 for (int k = 0; k < padding; k++)
                 {
                     output.print(' ');
@@ -1207,6 +1211,7 @@ public class Matrix implements Serializable
      * Matrix rank
      * 
      * @return effective numerical rank, obtained from SVD.
+     * @see SingularValueDecomposition#rank
      */
     public int rank()
     {
@@ -1352,7 +1357,7 @@ public class Matrix implements Serializable
      * @param B
      *            right hand side
      * @return solution if A is square, least squares solution otherwise.
-     *         Returns null if no such solution exists (matriy is singular or
+     *         Returns null if no such solution exists (matrix is singular or
      *         rank deficient).
      */
     public Matrix solve(final Matrix B)
@@ -1366,6 +1371,8 @@ public class Matrix implements Serializable
      * @param B
      *            right hand side
      * @return solution if A is square, least squares solution otherwise.
+     *         Returns null if no such solution exists (matrix is singular or
+     *         rank deficient).
      */
     public Matrix solveTranspose(final Matrix B)
     {
@@ -1409,8 +1416,6 @@ public class Matrix implements Serializable
      * @param B
      *            another matrix
      * @return Matrix product, A * B, null if matrix dimensions don't agree.
-     * @exception IllegalArgumentException
-     *                Matrix inner dimensions must agree.
      */
     public Matrix times(final Matrix B)
     {
@@ -1478,7 +1483,7 @@ public class Matrix implements Serializable
      */
     public double trace()
     {
-        final int dim = min(this.m, this.n);
+        final int dim = ((this.m < this.n) ? this.m : this.n);
         double t = 0;
         for (int i = 0; i < dim; i++)
         {
@@ -1503,6 +1508,22 @@ public class Matrix implements Serializable
             }
         }
         return M;
+    }
+
+    /**
+     * Transposes this matrix.
+     */
+    public void transposeThis()
+    {
+        for (int i = 0; i < this.A.length; i++)
+        {
+            for (int j = 0; j < i; j++)
+            {
+                final double t = this.A[i][j];
+                this.A[i][j] = this.A[j][i];
+                this.A[j][i] = t;
+            }
+        }
     }
 
     /**

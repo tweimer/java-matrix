@@ -7,19 +7,25 @@ import java.io.Serializable;
  * <P>
  * For a symmetric, positive definite matrix A, the Cholesky decomposition is an
  * lower triangular matrix L so that A = L*L'.
+ * </P>
  * <P>
  * If the matrix is not symmetric or positive definite, the constructor returns
  * a partial decomposition and sets an internal flag that may be queried by the
  * isSPD() method.
- * 
+ * </P>
  * 
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
- * @see http://tweimer.github.io/jama/
+ * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
 public class CholeskyDecomposition implements Serializable
 {
+    /**
+     * For the Serializeable interface
+     */
+    private static final long serialVersionUID = 1;
+
     /**
      * Array for internal storage of decomposition.
      * 
@@ -40,8 +46,6 @@ public class CholeskyDecomposition implements Serializable
      * @serial is symmetric and positive definite flag.
      */
     private boolean isspd;
-
-    private static final long serialVersionUID = 1;
 
     //    /* ------------------------
     //       Temporary, experimental code.
@@ -111,7 +115,7 @@ public class CholeskyDecomposition implements Serializable
     //     */
     //    public Matrix getR()
     //    {
-    //        return new Matrix(this.R, this.n, this.n);
+    //        return new Matrix(this.R, this.n);
     //    }
     //
     //    /* ------------------------
@@ -172,11 +176,11 @@ public class CholeskyDecomposition implements Serializable
     /**
      * Return triangular factor.
      * 
-     * @return L
+     * @return triangular factor L.
      */
     public Matrix getL()
     {
-        return new Matrix(this.n, this.n, this.L);
+        return new Matrix(this.n, this.L);
     }
 
     /**
@@ -194,55 +198,54 @@ public class CholeskyDecomposition implements Serializable
      * 
      * @param B
      *            A Matrix with as many rows as A and any number of columns.
-     * @return X so that L*L'*X = B
-     * @exception IllegalArgumentException
-     *                Matrix row dimensions must agree.
-     * @exception RuntimeException
-     *                Matrix is not symmetric positive definite.
+     * @return X so that L*L'*X = B. Returns null if row dimensions don't agree
+     *         or Matrix is not symmetric positive definite.
      */
     public Matrix solve(final Matrix B)
     {
         if (B.getRowDimension() != this.n)
         {
-            throw new IllegalArgumentException("Matrix row dimensions must agree."); //$NON-NLS-1$
+            return null;
+            //throw new IllegalArgumentException("Matrix row dimensions must agree."); //$NON-NLS-1$
         }
         else if (!this.isspd)
         {
-            throw new RuntimeException("Matrix is not symmetric positive definite."); //$NON-NLS-1$
+            return null;
+            //throw new RuntimeException("Matrix is not symmetric positive definite."); //$NON-NLS-1$
         }
-
-        // Copy right hand side.
-        final Matrix M = new Matrix(B);
-        final double[][] X = M.getArray();
-        final int nx = B.getColumnDimension();
-
-        // Solve L*Y = B;
-        for (int k = 0; k < this.n; k++)
+        else
         {
-            for (int j = 0; j < nx; j++)
-            {
-                for (int i = 0; i < k; i++)
-                {
-                    X[k][j] -= X[i][j] * this.L[k][i];
-                }
-                X[k][j] /= this.L[k][k];
-            }
-        }
+            // Copy right hand side.
+            final Matrix M = new Matrix(B);
+            final double[][] X = M.getArray();
+            final int nx = B.getColumnDimension();
 
-        // Solve L'*X = Y;
-        for (int k = this.n - 1; k >= 0; k--)
-        {
-            for (int j = 0; j < nx; j++)
+            // Solve L*Y = B;
+            for (int k = 0; k < this.n; k++)
             {
-                for (int i = k + 1; i < this.n; i++)
+                for (int j = 0; j < nx; j++)
                 {
-                    X[k][j] -= X[i][j] * this.L[i][k];
+                    for (int i = 0; i < k; i++)
+                    {
+                        X[k][j] -= X[i][j] * this.L[k][i];
+                    }
+                    X[k][j] /= this.L[k][k];
                 }
-                X[k][j] /= this.L[k][k];
             }
-        }
 
-        return M;
+            // Solve L'*X = Y;
+            for (int k = this.n - 1; k >= 0; k--)
+            {
+                for (int j = 0; j < nx; j++)
+                {
+                    for (int i = k + 1; i < this.n; i++)
+                    {
+                        X[k][j] -= X[i][j] * this.L[i][k];
+                    }
+                    X[k][j] /= this.L[k][k];
+                }
+            }
+            return M;
+        }
     }
-
 }

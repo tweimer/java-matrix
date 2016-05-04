@@ -18,12 +18,12 @@ import java.io.Serializable;
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
- * @see http://tweimer.github.io/jama/
+ * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
 public class QRDecomposition implements Serializable
 {
     /**
-     * 
+     * For the Serializeable interface
      */
     private static final long serialVersionUID = 1;
 

@@ -29,10 +29,15 @@ import static java.lang.Math.sqrt;
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
- * @see http://tweimer.github.io/jama/
+ * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
 public class SingularValueDecomposition implements Serializable
 {
+    /**
+     * For the Serializeable interface
+     */
+    private static final long serialVersionUID = 1;
+
     final static double tiny = Math.pow(2.0, -966.0);
 
     /**
@@ -57,11 +62,6 @@ public class SingularValueDecomposition implements Serializable
      * @serial column dimension.
      */
     private final int m, n;
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1;
 
     /**
      * Construct the singular value decomposition Structure to access U, S and
@@ -601,14 +601,10 @@ public class SingularValueDecomposition implements Serializable
      */
     public Matrix getS()
     {
-        final Matrix X = new Matrix(this.n, this.n);
+        final Matrix X = new Matrix(this.n);
         final double[][] S = X.getArray();
         for (int i = 0; i < this.n; i++)
         {
-            for (int j = 0; j < this.n; j++)
-            {
-                S[i][j] = 0D;
-            }
             S[i][i] = this.s[i];
         }
         return X;
@@ -641,7 +637,7 @@ public class SingularValueDecomposition implements Serializable
      */
     public Matrix getV()
     {
-        return new Matrix(this.n, this.n, this.V);
+        return new Matrix(this.n, this.V);
     }
 
     /**

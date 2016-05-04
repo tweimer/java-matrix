@@ -14,7 +14,7 @@ import java.text.DecimalFormat;
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
- * @see http://tweimer.github.io/jama/
+ * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  **/
 public class MagicSquareExample
 {
@@ -96,7 +96,7 @@ public class MagicSquareExample
                 }
             }
         }
-        // Sing|ly Even Order
+        // Singly Even Order
         else
         {
             final int p = n / 2, k = (n - 2) / 4;
