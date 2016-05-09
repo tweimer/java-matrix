@@ -135,37 +135,52 @@ public class CholeskyDecomposition implements Serializable
         final double[][] A = Arg.getArray();
         this.n = Arg.getRowDimension();
         this.L = new double[this.n][this.n];
+
+        // Is A square?
         this.isspd = (Arg.getColumnDimension() == this.n);
+
         // Main loop.
         for (int j = 0; j < this.n; j++)
         {
-            final double[] Lrowj = this.L[j];
-            double d = 0D;
+            // diagonal element
+            double d = A[j][j];
+
+            // for k=1,...,j-1
+            //     L[j][k] = (A[j][k] - L[k][1]^2 - .. - L[k][k-1]^2) / L[k][k]
             for (int k = 0; k < j; k++)
             {
-                final double[] Lrowk = this.L[k];
-                double s = 0D;
+                double s = A[j][k];
                 for (int i = 0; i < k; i++)
                 {
-                    s += Lrowk[i] * Lrowj[i];
+                    s -= this.L[k][i] * this.L[k][i];
                 }
-                Lrowj[k] = s = (A[j][k] - s) / this.L[k][k];
-                d += (s * s);
+
+                // L[k][k] > 0 for positive definite matrices
+                this.L[j][k] = (s /= this.L[k][k]);
+
+                d -= (s * s);
+
                 if (A[k][j] != A[j][k])
                 {
+                    // A is not symmetric
                     this.isspd = false;
                 }
             }
-            d = A[j][j] - d;
+
+            // L[j][j] = sqrt(A[j][j]-L[i][1]^2-...-L[i][i-1]^2)
             if (d <= 0D)
             {
+                // A is not positive definite!
                 this.isspd = false;
                 this.L[j][j] = 0D;
             }
             else
             {
                 this.L[j][j] = Math.sqrt(d);
+                // L[j][j] > 0
             }
+
+            // L[j][j+1] = ... = L[j][n]=0
             for (int k = j + 1; k < this.n; k++)
             {
                 this.L[j][k] = 0D;
