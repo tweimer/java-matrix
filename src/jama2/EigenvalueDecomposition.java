@@ -34,6 +34,10 @@ import java.io.*;
  **/
 public class EigenvalueDecomposition implements Serializable
 {
+
+    private static final long serialVersionUID = 1;
+    
+    
     /**
      * Row and column dimension (square matrix).
      * 
@@ -81,8 +85,6 @@ public class EigenvalueDecomposition implements Serializable
      */
     private transient double cdivr, cdivi;
 
-    private static final long serialVersionUID = 1;
-
     /**
      * Check for symmetry, then construct the eigenvalue decomposition Structure
      * to access D and V.
@@ -101,9 +103,13 @@ public class EigenvalueDecomposition implements Serializable
         this.issymmetric = true;
         for (int j = 0; (j < this.n) && this.issymmetric; j++)
         {
-            for (int i = 0; (i < this.n) && this.issymmetric; i++)
+            for (int i = 0; i < this.n; i++)
             {
-                this.issymmetric = (A[i][j] == A[j][i]);
+                if (A[i][j] != A[j][i])
+                {
+                    this.issymmetric = false;
+                    break;
+                }
             }
         }
 

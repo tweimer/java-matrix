@@ -309,121 +309,123 @@ public class Matrix implements Serializable
      * @param vals
      *            One-dimensional array of doubles, packed by columns (ala
      *            Fortran).
-     * @param m1
+     * @param m
      *            Number of rows.
      * @throws IllegalArgumentException
      *             Array length must be a multiple of m.
      */
-    public Matrix(final double vals[], final int m1)
+    public Matrix(final double vals[], final int m)
     {
-        this.n = (m1 != 0 ? vals.length / m1 : 0);
-        if ((m1 * this.n) != vals.length)
+        this.n = (m != 0 ? vals.length / m : 0);
+        if ((m * this.n) != vals.length)
         {
             throw new IllegalArgumentException("Array length must be a multiple of m."); //$NON-NLS-1$
         }
         else
         {
-            this.A = new double[this.m = m1][this.n];
+            this.A = new double[this.m = m][this.n];
             for (int i = 0; i < this.A.length; i++)
             {
                 for (int j = 0; j < this.A[i].length; j++)
                 {
-                    this.A[i][j] = vals[i + (j * m1)];
+                    this.A[i][j] = vals[i + (j * m)];
                 }
             }
         }
     }
 
     /**
-     * Construct a matrix from a 2-D array.
+     * Construct a matrix from a 2-D array. This does <b>not</b> copy the given
+     * array, it just stores it's reference.
      * 
-     * @param A1
+     * @param A
      *            Two-dimensional array of doubles.
      * @exception IllegalArgumentException
      *                All rows must have the same length
      * @see #constructWithCopy
      */
-    public Matrix(final double A1[][])
+    public Matrix(final double A[][])
     {
-        this.m = A1.length;
-        this.n = A1[0].length;
-        for (int i = 0; i < this.m; i++)
+        // TODO: how to handle null here?
+        this(A.length, A[0].length, A);
+
+        // check if each row has the same length
+        for (final double r[] : this.A)
         {
-            if (A1[i].length != this.n)
+            if (r.length != this.n)
             {
                 throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
             }
         }
-        this.A = A1;
     }
 
     /**
      * Construct a matrix quickly without checking arguments.
      * 
-     * @param m1
+     * @param m
      *            Number of rows.
-     * @param n1
+     * @param n
      *            Number of colums.
-     * @param A1
+     * @param A
      *            Two-dimensional array of doubles.
      */
-    public Matrix(final int m1, final int n1, final double A1[][])
+    public Matrix(final int m, final int n, final double A[][])
     {
-        this.A = A1;
-        this.m = m1;
-        this.n = n1;
+        this.A = A;
+        this.m = m;
+        this.n = n;
     }
 
     /**
      * Construct a matrix quickly without checking arguments.
      * 
-     * @param n1
+     * @param n
      *            Number of rows and colums.
-     * @param A1
+     * @param A
      *            Two-dimensional array of doubles.
      */
-    public Matrix(final int n1, final double A1[][])
+    public Matrix(final int n, final double A[][])
     {
-        this(n1, n1, A1);
+        this(n, n, A);
     }
 
     /**
      * Construct an n-by-n matrix of zeros.
      * 
-     * @param n1
+     * @param n
      *            Number of rows and colums.
      */
-    public Matrix(final int n1)
+    public Matrix(final int n)
     {
-        this(n1, n1);
+        this(n, n);
     }
 
     /**
      * Construct an m-by-n matrix of zeros.
      * 
-     * @param m1
+     * @param m
      *            Number of rows.
-     * @param n1
+     * @param n
      *            Number of colums
      */
-    public Matrix(final int m1, final int n1)
+    public Matrix(final int m, final int n)
     {
-        this.A = new double[this.m = m1][this.n = n1];
+        this.A = new double[this.m = m][this.n = n];
     }
 
     /**
      * Construct an m-by-n constant matrix.
      * 
-     * @param m1
+     * @param m
      *            Number of rows.
-     * @param n1
+     * @param n
      *            Number of colums.
      * @param s
      *            Fill the matrix with this scalar value.
      */
-    public Matrix(final int m1, final int n1, final double s)
+    public Matrix(final int m, final int n, final double s)
     {
-        this(m1, n1);
+        this(m, n);
         this.set(s);
     }
 
@@ -566,10 +568,23 @@ public class Matrix implements Serializable
      */
     private void checkMatrixDimensions(final Matrix B)
     {
-        if ((B.m != this.m) || (B.n != this.n))
+        if (!this.equalDimensions(B))
         {
             throw new IllegalArgumentException("Matrix dimensions must agree."); //$NON-NLS-1$
         }
+    }
+
+    /**
+     * Compares dimension of both matrices
+     * 
+     * @param B
+     *            another Matrix
+     * @return true if both have the same dimension, false otherwise, returns
+     *         false if B==null.
+     */
+    public boolean equalDimensions(final Matrix B)
+    {
+        return (B != null) && (B.m == this.m) && (B.n == this.n);
     }
 
     /**
