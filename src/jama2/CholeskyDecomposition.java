@@ -222,12 +222,10 @@ public class CholeskyDecomposition implements Serializable
         if (B.getRowDimension() != this.n)
         {
             return null;
-            //throw new IllegalArgumentException("Matrix row dimensions must agree."); //$NON-NLS-1$
         }
         else if (!this.isspd)
         {
             return null;
-            //throw new RuntimeException("Matrix is not symmetric positive definite."); //$NON-NLS-1$
         }
         else
         {
