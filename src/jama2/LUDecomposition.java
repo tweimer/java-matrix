@@ -145,13 +145,13 @@ public class LUDecomposition implements Serializable
         this.m = A.getRowDimension();
         this.n = A.getColumnDimension();
 
-        int pivsign = 1;
-
         this.piv = new int[this.m];
         for (int i = 0; i < this.piv.length; i++)
         {
             this.piv[i] = i;
         }
+
+        int pivsign = 1;
 
         // Outer loop.
         for (int j = 0; j < this.n; j++)
@@ -281,7 +281,7 @@ public class LUDecomposition implements Serializable
 
             for (int j = i + 1; j < this.n; j++)
             {
-                L[i][j] = 0D;
+                L[i][j] = this.LU[i][j];
             }
         }
         return X;
