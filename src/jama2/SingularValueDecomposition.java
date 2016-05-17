@@ -411,9 +411,10 @@ public class SingularValueDecomposition implements Serializable
 
                     if (wantv)
                     {
-                        for (final double[] rowV : this.V)
+                        for (final double rowV[] : this.V)
                         {
-                            t = rowV[p - 1]; // remember V[i][p - 1]
+                            // remember V[i][p - 1]
+                            t = rowV[p - 1];
                             rowV[p - 1] = (cs * t) - (sn * rowV[j]);
                             rowV[j] = (cs * rowV[j]) + (sn * t);
                         }

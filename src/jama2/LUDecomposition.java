@@ -50,7 +50,7 @@ public class LUDecomposition implements Serializable
      * 
      * @serial pivot sign.
      */
-    private int pivsign = 1;
+    private final int pivsign;
 
     /**
      * Internal storage of pivot vector.
@@ -150,8 +150,11 @@ public class LUDecomposition implements Serializable
         this.LU = A.getArrayCopy();
         this.m = A.getRowDimension();
         this.n = A.getColumnDimension();
+
+        int pivsign = 1;
+
         this.piv = new int[this.m];
-        for (int i = 0; i < this.m; i++)
+        for (int i = 0; i < this.piv.length; i++)
         {
             this.piv[i] = i;
         }
@@ -205,7 +208,7 @@ public class LUDecomposition implements Serializable
                 this.piv[j] = k;
 
                 // alternate pivsign
-                this.pivsign = -this.pivsign;
+                pivsign = -pivsign;
             }
 
             // Compute multipliers.
@@ -217,29 +220,35 @@ public class LUDecomposition implements Serializable
                 }
             }
         }
+        this.pivsign = pivsign;
     }
 
     /**
      * Determinant of a square matrix
      * 
-     * @return det(A)for square matrices, NaN otherwise
+     * @return det(A) for square matrices, NaN otherwise. Iff det equals 0,
+     *         matrix is singular.
      */
     public double det()
     {
         if (this.m == this.n)
         {
             // go through the LU decomposition
-            double d = this.pivsign;
+            // For A = P*L*U, det(A)=det(P)*det(L)*det(U), where
+            // det(P) is pivsign
+            // det(L) is equal to 1
+            // det(U) is the product of the diagonal entries
+            // So lets start with pivsign and multiply with the diagonal entries.
+            double det = this.pivsign;
             for (int j = 0; j < this.n; j++)
             {
-                d *= this.LU[j][j];
+                det *= this.LU[j][j];
             }
-            return d;
+            return det;
         }
         else
         {
             return Double.NaN;
-            //throw new IllegalArgumentException("Matrix must be square."); //$NON-NLS-1$
         }
     }
 
@@ -261,7 +270,7 @@ public class LUDecomposition implements Serializable
     /**
      * Return lower triangular factor
      * 
-     * @return L
+     * @return L lower triangular factor
      */
     public Matrix getL()
     {
@@ -269,9 +278,16 @@ public class LUDecomposition implements Serializable
         final double L[][] = X.getArray();
         for (int i = 0; i < this.m; i++)
         {
-            for (int j = 0; j < this.n; j++)
+            for (int j = 0; j < i; j++)
             {
-                L[i][j] = ((i > j) ? this.LU[i][j] : ((i == j) ? 1D : 0D));
+                L[i][j] = this.LU[i][j];
+            }
+
+            L[i][i] = 1D;
+
+            for (int j = i + 1; j < this.n; j++)
+            {
+                L[i][j] = 0D;
             }
         }
         return X;
@@ -280,7 +296,7 @@ public class LUDecomposition implements Serializable
     /**
      * Return pivot permutation vector
      * 
-     * @return piv
+     * @return piv pivot permutation vector
      */
     public int[] getPivot()
     {
@@ -290,7 +306,7 @@ public class LUDecomposition implements Serializable
     /**
      * Return upper triangular factor
      * 
-     * @return U
+     * @return U upper triangular factor
      */
     public Matrix getU()
     {
@@ -298,6 +314,11 @@ public class LUDecomposition implements Serializable
         final double[][] U = X.getArray();
         for (int i = 0; i < this.n; i++)
         {
+            for (int j = 0; j < i; j++)
+            {
+                U[i][j] = 0;
+            }
+
             for (int j = i; j < this.n; j++)
             {
                 U[i][j] = this.LU[i][j];
@@ -328,22 +349,12 @@ public class LUDecomposition implements Serializable
      * 
      * @param B
      *            A Matrix with as many rows as A and any number of columns.
-     * @return Returns null if matrix row dimensions don't agree or matrix is
+     * @return Returns null if matrix row dimensions don't agree or A is
      *         singular. Returns X so that L*U*X = B(piv,:) otherwise.
      */
     public Matrix solve(final Matrix B)
     {
-        if (B.getRowDimension() != this.m)
-        {
-            return null;
-            //throw new IllegalArgumentException("Matrix row dimensions must agree."); //$NON-NLS-1$
-        }
-        else if (!this.isNonsingular())
-        {
-            return null;
-            //throw new RuntimeException("Matrix is singular."); //$NON-NLS-1$
-        }
-        else
+        if ((B.getRowDimension() == this.m) && this.isNonsingular())
         {
             // Copy right hand side with pivoting
             final int nx = B.getColumnDimension();
@@ -366,6 +377,7 @@ public class LUDecomposition implements Serializable
             {
                 for (int j = 0; j < nx; j++)
                 {
+                    // LU[k][k] != 0
                     X[k][j] /= this.LU[k][k];
                 }
                 for (int i = 0; i < k; i++)
@@ -377,6 +389,10 @@ public class LUDecomposition implements Serializable
                 }
             }
             return Xmat;
+        }
+        else
+        {
+            return null;
         }
     }
 }

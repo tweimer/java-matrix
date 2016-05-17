@@ -45,7 +45,7 @@ public class CholeskyDecomposition implements Serializable
      * 
      * @serial is symmetric and positive definite flag.
      */
-    private boolean isspd;
+    private final boolean isspd;
 
     //    /* ------------------------
     //       Temporary, experimental code.
@@ -137,7 +137,7 @@ public class CholeskyDecomposition implements Serializable
         this.L = new double[this.n][this.n];
 
         // Is A square?
-        this.isspd = (Arg.getColumnDimension() == this.n);
+        boolean isspd = (Arg.getColumnDimension() == this.n);
 
         // Main loop.
         for (int j = 0; j < this.n; j++)
@@ -146,7 +146,7 @@ public class CholeskyDecomposition implements Serializable
             double d = A[j][j];
 
             // for k=1,...,j-1
-            //     L[j][k] = (A[j][k] - L[k][1]^2 - .. - L[k][k-1]^2) / L[k][k]
+            //     L[j][k] =this. (A[j][k] - L[k][1]^2 - .. - L[k][k-1]^2) / L[k][k]
             for (int k = 0; k < j; k++)
             {
                 double s = A[j][k];
@@ -163,7 +163,7 @@ public class CholeskyDecomposition implements Serializable
                 if (A[k][j] != A[j][k])
                 {
                     // A is not symmetric
-                    this.isspd = false;
+                    isspd = false;
                 }
             }
 
@@ -171,7 +171,7 @@ public class CholeskyDecomposition implements Serializable
             if (d <= 0D)
             {
                 // A is not positive definite!
-                this.isspd = false;
+                isspd = false;
                 this.L[j][j] = 0D;
             }
             else
@@ -186,6 +186,7 @@ public class CholeskyDecomposition implements Serializable
                 this.L[j][k] = 0D;
             }
         }
+        this.isspd = isspd;
     }
 
     /**
