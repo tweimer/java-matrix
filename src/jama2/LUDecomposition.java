@@ -273,6 +273,7 @@ public class LUDecomposition implements Serializable
         for (int i = 0; i < this.m; i++)
         {
             for (int j = 0; j < i; j++)
+<<<<<<< HEAD
             {
                 L[i][j] = this.LU[i][j];
             }
@@ -281,6 +282,16 @@ public class LUDecomposition implements Serializable
 
             for (int j = i + 1; j < this.n; j++)
             {
+=======
+            {
+                L[i][j] = this.LU[i][j];
+            }
+
+            L[i][i] = 1D;
+
+            for (int j = i + 1; j < this.n; j++)
+            {
+>>>>>>> c1e4671155d7b99b5e5151b293c7ff8eb8175932
                 L[i][j] = 0D;
             }
         }

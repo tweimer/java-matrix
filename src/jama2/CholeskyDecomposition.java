@@ -146,7 +146,7 @@ public class CholeskyDecomposition implements Serializable
             double d = A[j][j];
 
             // for k=1,...,j-1
-            //     L[j][k] = (A[j][k] - L[k][1]^2 - .. - L[k][k-1]^2) / L[k][k]
+            //     L[j][k] =this. (A[j][k] - L[k][1]^2 - .. - L[k][k-1]^2) / L[k][k]
             for (int k = 0; k < j; k++)
             {
                 double s = A[j][k];
