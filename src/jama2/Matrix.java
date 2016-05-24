@@ -228,7 +228,6 @@ public class Matrix implements Serializable
         tokenizer.wordChars(0, 255);
         tokenizer.whitespaceChars(0, ' ');
         tokenizer.eolIsSignificant(true);
-        final Vector<Double> vD = new Vector<>();
 
         while (tokenizer.nextToken() == StreamTokenizer.TT_EOL)
         {
@@ -240,30 +239,32 @@ public class Matrix implements Serializable
             throw new IOException("Unexpected EOF on matrix read."); //$NON-NLS-1$
         }
 
+        final Vector<Double> vD = new Vector<>();
         do
         {
             // Read & store 1st row.
-            vD.addElement(Double.valueOf(tokenizer.sval));
+            vD.addElement(new Double(tokenizer.sval));
         }
         while (tokenizer.nextToken() == StreamTokenizer.TT_WORD);
 
         // Now we've got the number of columns!
         final int n = vD.size();
         double row[] = new double[n];
-        for (int j = 0; j < n; j++)
+        int j = 0;
+        for (final Double d : vD)
         {
             // extract the elements of the 1st row.
-            row[j] = vD.elementAt(j).doubleValue();
+            row[j++] = d.doubleValue();
         }
-        final Vector<double[]> v = new Vector<>();
 
         // Start storing rows instead of columns.
+        final Vector<double[]> v = new Vector<>();
         v.addElement(row);
         while (tokenizer.nextToken() == StreamTokenizer.TT_WORD)
         {
             // While non-empty lines
             v.addElement(row = new double[n]);
-            int j = 0;
+            j = 0;
             do
             {
                 if (j >= n)
@@ -654,6 +655,13 @@ public class Matrix implements Serializable
         return (other == this) || ((other != null) && ((this.m == other.m) && (this.n == other.n) && Arrays.deepEquals(this.A, other.A)));
     }
 
+    /**
+     * Overloads
+     * 
+     * @param obj
+     *            another object
+     * @return true if other equals A
+     */
     @Override
     public boolean equals(final Object obj)
     {
