@@ -86,20 +86,19 @@ public class Matrix implements Serializable
     {
         final int m = A.length;
         final int n = A[0].length;
-        final Matrix X = new Matrix(m, n);
-        final double[][] C = X.getArray();
-        for (int i = 0; i < m; i++)
+        final double C[][] = new double[m][];
+        for (int i = 0; i < C.length; i++)
         {
-            if (A[i].length != n)
-            {
-                throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
-            }
-            for (int j = 0; j < n; j++)
-            {
-                C[i][j] = A[i][j];
-            }
+			if (A[i].length != n)
+			{
+				throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
+			}
+			else
+			{
+				C[i] = Arrays.copyOf(A[i], n);
+			}
         }
-        return X;
+        return new Matrix(m, n, C);
     }
 
     /**
@@ -713,10 +712,10 @@ public class Matrix implements Serializable
      */
     public double[][] getArrayCopy()
     {
-        final double C[][] = new double[this.A.length][];
+        final double C[][] = new double[this.m][];
         for (int i = 0; i < C.length; i++)
         {
-            C[i] = Arrays.copyOf(this.A[i], this.A[i].length);
+            C[i] = Arrays.copyOf(this.A[i], this.n);
         }
         return C;
     }

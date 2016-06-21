@@ -221,10 +221,11 @@ public class QRDecomposition implements Serializable
         }
 
         // Copy right hand side
-        final int nx = B.getColumnDimension();
-        final double[][] X = B.getArrayCopy();
+        final Matrix M = new Matrix(B);
+        final double[][] X = M.getArray();
 
         // Compute Y = transpose(Q)*B
+        final int nx = B.getColumnDimension();
         for (int k = 0; k < this.n; k++)
         {
             for (int j = 0; j < nx; j++)
@@ -256,6 +257,6 @@ public class QRDecomposition implements Serializable
                 }
             }
         }
-        return new Matrix(this.n, nx, X).getMatrix(0, this.n - 1, 0, nx - 1);
+        return M.getMatrix(0, this.n - 1, 0, nx - 1);
     }
 }
