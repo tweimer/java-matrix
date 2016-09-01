@@ -48,7 +48,7 @@ import static java.lang.Math.abs;
  * <DT><B>Example of use:</B></DT>
  * <DD>Solve a linear system A x = b and compute the residual norm, ||b - A x||.
  * <P>
- * 
+ *
  * <PRE>
  * double[][] vals = { { 1., 2., 3 }, { 4., 5., 6. }, { 7., 8., 10. } };
  * Matrix A = new Matrix(vals);
@@ -57,16 +57,16 @@ import static java.lang.Math.abs;
  * Matrix r = A.times(x).minus(b);
  * double rnorm = r.normInf();
  * </PRE>
- * 
+ *
  * </DD>
  * </DL>
- * 
+ *
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class Matrix implements Serializable
+public class Matrix implements Cloneable, Serializable
 {
     /**
      * For the Serializeable interface
@@ -75,7 +75,7 @@ public class Matrix implements Serializable
 
     /**
      * Construct a matrix from a copy of a 2-D array.
-     * 
+     *
      * @param A
      *            Two-dimensional array of doubles.
      * @return Matrix with copied array
@@ -89,21 +89,21 @@ public class Matrix implements Serializable
         final double C[][] = new double[m][];
         for (int i = 0; i < C.length; i++)
         {
-			if (A[i].length != n)
-			{
-				throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
-			}
-			else
-			{
-				C[i] = Arrays.copyOf(A[i], n);
-			}
+            if (A[i].length != n)
+            {
+                throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
+            }
+            else
+            {
+                C[i] = Arrays.copyOf(A[i], n);
+            }
         }
         return new Matrix(m, n, C);
     }
 
     /**
      * Creates a diagonal Matrix
-     * 
+     *
      * @param d
      *            diagonal elements
      * @return diagonal Matrix
@@ -120,7 +120,7 @@ public class Matrix implements Serializable
 
     /**
      * Generate identity matrix
-     * 
+     *
      * @param m
      *            Number of rows and colums.
      * @return An m-by-n matrix with ones on the diagonal and zeros elsewhere.
@@ -132,7 +132,7 @@ public class Matrix implements Serializable
 
     /**
      * Generate identity matrix
-     * 
+     *
      * @param m
      *            Number of rows.
      * @param n
@@ -148,7 +148,7 @@ public class Matrix implements Serializable
 
     /**
      * Generate matrix with random elements
-     * 
+     *
      * @param n
      *            Number of rows and colums.
      * @return An n-by-n matrix with uniformly distributed random elements.
@@ -160,7 +160,7 @@ public class Matrix implements Serializable
 
     /**
      * Generate matrix with random elements
-     * 
+     *
      * @param m
      *            Number of rows.
      * @param n
@@ -176,7 +176,7 @@ public class Matrix implements Serializable
 
     /**
      * Generate matrix with random elements
-     * 
+     *
      * @param n
      *            Number of rows and colums.
      * @return An n-by-n matrix with uniformly distributed random elements.
@@ -188,7 +188,7 @@ public class Matrix implements Serializable
 
     /**
      * Generate matrix with random elements
-     * 
+     *
      * @param m
      *            Number of rows.
      * @param n
@@ -207,7 +207,7 @@ public class Matrix implements Serializable
      * printed matrices can be read back in (provided they were printed using US
      * Locale). Elements are separated by whitespace, all the elements for each
      * row appear on a single line, the last row is followed by a blank line.
-     * 
+     *
      * @param input
      *            the input stream.
      * @return Matrix
@@ -290,14 +290,14 @@ public class Matrix implements Serializable
 
     /**
      * Array for internal storage of elements.
-     * 
+     *
      * @serial internal array storage.
      */
     private final double A[][];
 
     /**
      * Row and column dimensions.
-     * 
+     *
      * @serial row dimension.
      * @serial column dimension.
      */
@@ -305,7 +305,7 @@ public class Matrix implements Serializable
 
     /**
      * Construct a matrix from a one-dimensional packed array
-     * 
+     *
      * @param vals
      *            One-dimensional array of doubles, packed by columns (ala
      *            Fortran).
@@ -316,8 +316,8 @@ public class Matrix implements Serializable
      */
     public Matrix(final double vals[], final int m)
     {
-        this.n = (m != 0 ? vals.length / m : 0);
-        if ((m * this.n) != vals.length)
+        this.n = m != 0 ? vals.length / m : 0;
+        if (m * this.n != vals.length)
         {
             throw new IllegalArgumentException("Array length must be a multiple of m."); //$NON-NLS-1$
         }
@@ -328,7 +328,7 @@ public class Matrix implements Serializable
             {
                 for (int j = 0; j < this.A[i].length; j++)
                 {
-                    this.A[i][j] = vals[i + (j * m)];
+                    this.A[i][j] = vals[i + j * m];
                 }
             }
         }
@@ -337,7 +337,7 @@ public class Matrix implements Serializable
     /**
      * Construct a matrix from a 2-D array. This does <b>not</b> copy the given
      * array, it just stores it's reference.
-     * 
+     *
      * @param A
      *            Two-dimensional array of doubles.
      * @exception IllegalArgumentException
@@ -361,7 +361,7 @@ public class Matrix implements Serializable
 
     /**
      * Construct a matrix quickly without checking arguments.
-     * 
+     *
      * @param m
      *            Number of rows.
      * @param n
@@ -378,7 +378,7 @@ public class Matrix implements Serializable
 
     /**
      * Construct a matrix quickly without checking arguments.
-     * 
+     *
      * @param n
      *            Number of rows and colums.
      * @param A
@@ -391,7 +391,7 @@ public class Matrix implements Serializable
 
     /**
      * Construct an n-by-n matrix of zeros.
-     * 
+     *
      * @param n
      *            Number of rows and colums.
      */
@@ -402,7 +402,7 @@ public class Matrix implements Serializable
 
     /**
      * Construct an m-by-n matrix of zeros.
-     * 
+     *
      * @param m
      *            Number of rows.
      * @param n
@@ -415,7 +415,7 @@ public class Matrix implements Serializable
 
     /**
      * Construct an m-by-n constant matrix.
-     * 
+     *
      * @param m
      *            Number of rows.
      * @param n
@@ -431,7 +431,7 @@ public class Matrix implements Serializable
 
     /**
      * Copies Matrix X
-     * 
+     *
      * @param X
      *            Matrix to be copied
      */
@@ -442,7 +442,7 @@ public class Matrix implements Serializable
 
     /**
      * Element-by-element left division, C = A.\B
-     * 
+     *
      * @param B
      *            another matrix
      * @return A.\B
@@ -463,7 +463,7 @@ public class Matrix implements Serializable
 
     /**
      * Element-by-element left division in place, A = A.\B
-     * 
+     *
      * @param B
      *            another matrix
      */
@@ -481,7 +481,7 @@ public class Matrix implements Serializable
 
     /**
      * Element-by-element right division, C = A./B
-     * 
+     *
      * @param B
      *            another matrix
      * @return A./B
@@ -502,7 +502,7 @@ public class Matrix implements Serializable
 
     /**
      * Element-by-element right division in place, A = A./B
-     * 
+     *
      * @param B
      *            another matrix
      */
@@ -520,7 +520,7 @@ public class Matrix implements Serializable
 
     /**
      * Element-by-element multiplication, C = A.*B
-     * 
+     *
      * @param B
      *            another matrix
      * @return A.*B
@@ -542,7 +542,7 @@ public class Matrix implements Serializable
 
     /**
      * Element-by-element multiplication in place, A = A.*B
-     * 
+     *
      * @param B
      *            another matrix
      * @see #arrayTimes
@@ -561,7 +561,7 @@ public class Matrix implements Serializable
 
     /**
      * Check if size(A) == size(B)
-     * 
+     *
      * @param B
      * @throws IllegalArgumentException
      *             if they don't agree.
@@ -576,7 +576,7 @@ public class Matrix implements Serializable
 
     /**
      * Compares dimension of both matrices
-     * 
+     *
      * @param B
      *            another Matrix
      * @return true if both have the same dimension, false otherwise, returns
@@ -584,12 +584,12 @@ public class Matrix implements Serializable
      */
     public boolean equalDimensions(final Matrix B)
     {
-        return (B != null) && (B.m == this.m) && (B.n == this.n);
+        return B != null && B.m == this.m && B.n == this.n;
     }
 
     /**
      * Cholesky Decomposition
-     * 
+     *
      * @return CholeskyDecomposition
      * @see CholeskyDecomposition
      */
@@ -600,7 +600,7 @@ public class Matrix implements Serializable
 
     /**
      * Matrix condition (2 norm)
-     * 
+     *
      * @return ratio of largest to smallest singular value.
      * @see SingularValueDecomposition#cond()
      */
@@ -610,20 +610,20 @@ public class Matrix implements Serializable
     }
 
     /**
-     * Returns a copy of the matrix
-     * 
+     * Returns a copy of the matrix.
+     * Calls {@link #Matrix(Matrix)}
+     *
      * @return copy of this Matrix
-     * @deprecated use {@link #Matrix(Matrix)}
      */
-    @Deprecated
-    public Matrix copy()
+    @Override
+    public Matrix clone()
     {
         return new Matrix(this);
     }
 
     /**
      * Matrix determinant
-     * 
+     *
      * @return determinant
      */
     public double det()
@@ -633,7 +633,7 @@ public class Matrix implements Serializable
 
     /**
      * Eigenvalue Decomposition
-     * 
+     *
      * @return EigenvalueDecomposition
      * @see EigenvalueDecomposition
      */
@@ -644,19 +644,19 @@ public class Matrix implements Serializable
 
     /**
      * Compares a Matrix to another Matrix
-     * 
+     *
      * @param other
      *            another Matrix
      * @return true if other equals A
      */
     public boolean equals(final Matrix other)
     {
-        return (other == this) || ((other != null) && ((this.m == other.m) && (this.n == other.n) && Arrays.deepEquals(this.A, other.A)));
+        return other == this || other != null && this.m == other.m && this.n == other.n && Arrays.deepEquals(this.A, other.A);
     }
 
     /**
      * Overloads
-     * 
+     *
      * @param obj
      *            another object
      * @return true if other equals A
@@ -664,12 +664,12 @@ public class Matrix implements Serializable
     @Override
     public boolean equals(final Object obj)
     {
-        return (obj instanceof Matrix) && this.equals((Matrix) obj);
+        return obj instanceof Matrix && this.equals((Matrix) obj);
     }
 
     /**
      * Returns index at index i, row-by-row (MATLAB like)
-     * 
+     *
      * @param i
      *            index
      * @return entry
@@ -681,7 +681,7 @@ public class Matrix implements Serializable
 
     /**
      * Get a single element.
-     * 
+     *
      * @param i
      *            Row index.
      * @param j
@@ -697,7 +697,7 @@ public class Matrix implements Serializable
 
     /**
      * Access the internal two-dimensional array.
-     * 
+     *
      * @return Pointer to the two-dimensional array of matrix elements.
      */
     public double[][] getArray()
@@ -707,7 +707,7 @@ public class Matrix implements Serializable
 
     /**
      * Copy the internal two-dimensional array.
-     * 
+     *
      * @return Two-dimensional array copy of matrix elements.
      */
     public double[][] getArrayCopy()
@@ -722,7 +722,7 @@ public class Matrix implements Serializable
 
     /**
      * Get column dimension.
-     * 
+     *
      * @return n, the number of columns.
      */
     public int getColumnDimension()
@@ -732,7 +732,7 @@ public class Matrix implements Serializable
 
     /**
      * Make a one-dimensional column packed copy of the internal array.
-     * 
+     *
      * @return Matrix elements packed in a one-dimensional array by columns.
      */
     public double[] getColumnPackedCopy()
@@ -742,7 +742,7 @@ public class Matrix implements Serializable
         {
             for (int j = 0; j < this.n; j++)
             {
-                vals[i + (j * this.m)] = this.A[i][j];
+                vals[i + j * this.m] = this.A[i][j];
             }
         }
         return vals;
@@ -750,7 +750,7 @@ public class Matrix implements Serializable
 
     /**
      * Make a one-dimensional row packed copy of the internal array.
-     * 
+     *
      * @return Matrix elements packed in a one-dimensional array by rows.
      */
     public double[] getRowPackedCopy()
@@ -769,7 +769,7 @@ public class Matrix implements Serializable
 
     /**
      * Get a submatrix.
-     * 
+     *
      * @param i0
      *            Initial row index (inclusive)
      * @param i1
@@ -782,7 +782,7 @@ public class Matrix implements Serializable
      */
     public Matrix getMatrix(final int i0, final int i1, final int c[])
     {
-        final int m1 = (i1 - i0) + 1, n1 = c.length;
+        final int m1 = i1 - i0 + 1, n1 = c.length;
         final Matrix M = new Matrix(m1, n1);
         for (int i = i0; i <= i1; i++)
         {
@@ -796,7 +796,7 @@ public class Matrix implements Serializable
 
     /**
      * Get a submatrix.
-     * 
+     *
      * @param i0
      *            Initial row index (inclusive)
      * @param i1
@@ -811,7 +811,7 @@ public class Matrix implements Serializable
      */
     public Matrix getMatrix(final int i0, final int i1, final int j0, final int j1)
     {
-        final int m1 = (i1 - i0) + 1, n1 = (j1 - j0) + 1;
+        final int m1 = i1 - i0 + 1, n1 = j1 - j0 + 1;
         final Matrix M = new Matrix(m1, n1);
         for (int i = i0; i <= i1; i++)
         {
@@ -825,7 +825,7 @@ public class Matrix implements Serializable
 
     /**
      * Get a submatrix.
-     * 
+     *
      * @param r
      *            Array of row indices
      * @param j0
@@ -838,7 +838,7 @@ public class Matrix implements Serializable
      */
     public Matrix getMatrix(final int r[], final int j0, final int j1)
     {
-        final int m1 = r.length, n1 = (j1 - j0) + 1;
+        final int m1 = r.length, n1 = j1 - j0 + 1;
         final Matrix M = new Matrix(m1, n1);
         for (int i = 0; i < m1; i++)
         {
@@ -852,7 +852,7 @@ public class Matrix implements Serializable
 
     /**
      * Get a submatrix.
-     * 
+     *
      * @param r
      *            Array of row indices.
      * @param c
@@ -877,7 +877,7 @@ public class Matrix implements Serializable
 
     /**
      * Get row dimension.
-     * 
+     *
      * @return m, the number of rows.
      */
     public int getRowDimension()
@@ -890,9 +890,9 @@ public class Matrix implements Serializable
     {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + Arrays.hashCode(this.A);
-        result = (prime * result) + this.m;
-        result = (prime * result) + this.n;
+        result = prime * result + Arrays.hashCode(this.A);
+        result = prime * result + this.m;
+        result = prime * result + this.n;
         return result;
     }
 
@@ -905,14 +905,14 @@ public class Matrix implements Serializable
         {
             for (int j = 0; j < this.A[i].length; j++)
             {
-                this.A[i][j] = (i == j ? 1D : 0D);
+                this.A[i][j] = i == j ? 1D : 0D;
             }
         }
     }
 
     /**
      * Matrix inverse or pseudoinverse
-     * 
+     *
      * @return inverse(A) if A is square, pseudoinverse otherwise.
      * @see #solve
      */
@@ -925,7 +925,7 @@ public class Matrix implements Serializable
 
     /**
      * LU Decomposition
-     * 
+     *
      * @return LUDecomposition
      * @see LUDecomposition
      */
@@ -936,7 +936,7 @@ public class Matrix implements Serializable
 
     /**
      * C = A - B
-     * 
+     *
      * @param B
      *            another matrix
      * @return new Matrix A - B
@@ -958,7 +958,7 @@ public class Matrix implements Serializable
 
     /**
      * A = A - B
-     * 
+     *
      * @param B
      *            another matrix
      * @see #minus
@@ -977,7 +977,7 @@ public class Matrix implements Serializable
 
     /**
      * One norm
-     * 
+     *
      * @return maximum column sum.
      */
     public double norm1()
@@ -1000,7 +1000,7 @@ public class Matrix implements Serializable
 
     /**
      * Two norm
-     * 
+     *
      * @return maximum singular value.
      */
     public double norm2()
@@ -1010,7 +1010,7 @@ public class Matrix implements Serializable
 
     /**
      * Frobenius norm
-     * 
+     *
      * @return sqrt of sum of squares of all elements.
      */
     public double normF()
@@ -1028,7 +1028,7 @@ public class Matrix implements Serializable
 
     /**
      * Infinity norm
-     * 
+     *
      * @return maximum row sum.
      */
     public double normInf()
@@ -1051,7 +1051,7 @@ public class Matrix implements Serializable
 
     /**
      * C = A + B
-     * 
+     *
      * @param B
      *            another matrix
      * @return new Matrix A + B
@@ -1073,7 +1073,7 @@ public class Matrix implements Serializable
 
     /**
      * A = A + B
-     * 
+     *
      * @param B
      *            another matrix
      * @see #plus
@@ -1095,7 +1095,7 @@ public class Matrix implements Serializable
      * format object, and right justify within columns of width characters. Note
      * that is the matrix is to be read back in, you probably will want to use a
      * NumberFormat that is set to US Locale.
-     * 
+     *
      * @param format
      *            A Formatting object for individual elements.
      * @param width
@@ -1113,7 +1113,7 @@ public class Matrix implements Serializable
      * Use the format object, and right justify within columns of width
      * characters. Note that is the matrix is to be read back in, you probably
      * will want to use a NumberFormat that is set to US Locale.
-     * 
+     *
      * @param output
      *            the output stream.
      * @param format
@@ -1134,7 +1134,7 @@ public class Matrix implements Serializable
                 // format the number
                 final String s = format.format(d);
                 // At _least_ 1 space
-                final int padding = (width > s.length()) ? width - s.length() : 1;
+                final int padding = width > s.length() ? width - s.length() : 1;
                 for (int k = 0; k < padding; k++)
                 {
                     output.print(' ');
@@ -1151,7 +1151,7 @@ public class Matrix implements Serializable
     /**
      * Print the matrix to the output stream. Line the elements up in columns
      * with a Fortran-like 'Fw.d' style format.
-     * 
+     *
      * @param output
      *            Output stream.
      * @param w
@@ -1177,7 +1177,7 @@ public class Matrix implements Serializable
     /**
      * Print the matrix to stdout. Line the elements up in columns with a
      * Fortran-like 'Fw.d' style format.
-     * 
+     *
      * @param w
      *            Column width.
      * @param d
@@ -1190,7 +1190,7 @@ public class Matrix implements Serializable
 
     /**
      * QR Decomposition
-     * 
+     *
      * @return QRDecomposition
      * @see QRDecomposition
      */
@@ -1231,7 +1231,7 @@ public class Matrix implements Serializable
 
     /**
      * Matrix rank
-     * 
+     *
      * @return effective numerical rank, obtained from SVD.
      * @see SingularValueDecomposition#rank
      */
@@ -1241,7 +1241,7 @@ public class Matrix implements Serializable
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void set(final double s)
@@ -1256,7 +1256,7 @@ public class Matrix implements Serializable
     }
 
     /**
-     * 
+     *
      * @param i
      *            index
      * @param s
@@ -1268,7 +1268,7 @@ public class Matrix implements Serializable
 
     /**
      * Set a single element.
-     * 
+     *
      * @param i
      *            Row index.
      * @param j
@@ -1283,7 +1283,7 @@ public class Matrix implements Serializable
 
     /**
      * Set a submatrix.
-     * 
+     *
      * @param i0
      *            Initial row index
      * @param i1
@@ -1308,7 +1308,7 @@ public class Matrix implements Serializable
 
     /**
      * Set a submatrix.
-     * 
+     *
      * @param i0
      *            Initial row index
      * @param i1
@@ -1331,7 +1331,7 @@ public class Matrix implements Serializable
 
     /**
      * Set a submatrix.
-     * 
+     *
      * @param r
      *            Array of row indices.
      * @param j0
@@ -1354,7 +1354,7 @@ public class Matrix implements Serializable
 
     /**
      * Set a submatrix.
-     * 
+     *
      * @param r
      *            Array of row indices.
      * @param c
@@ -1375,7 +1375,7 @@ public class Matrix implements Serializable
 
     /**
      * Solve A*X = B
-     * 
+     *
      * @param B
      *            right hand side
      * @return solution if A is square, least squares solution otherwise.
@@ -1384,12 +1384,12 @@ public class Matrix implements Serializable
      */
     public Matrix solve(final Matrix B)
     {
-        return (this.m == this.n ? this.lu().solve(B) : this.qr().solve(B));
+        return this.m == this.n ? this.lu().solve(B) : this.qr().solve(B);
     }
 
     /**
      * Solve X*A = B, which is also A'*X' = B'
-     * 
+     *
      * @param B
      *            right hand side
      * @return solution if A is square, least squares solution otherwise.
@@ -1403,7 +1403,7 @@ public class Matrix implements Serializable
 
     /**
      * Singular Value Decomposition
-     * 
+     *
      * @return SingularValueDecomposition
      * @see SingularValueDecomposition
      */
@@ -1414,7 +1414,7 @@ public class Matrix implements Serializable
 
     /**
      * Multiply a matrix by a scalar, C = s*A.
-     * 
+     *
      * @param s
      *            scalar
      * @return new Matrix s*A
@@ -1434,7 +1434,7 @@ public class Matrix implements Serializable
 
     /**
      * Linear algebraic matrix multiplication, A * B
-     * 
+     *
      * @param B
      *            another matrix
      * @return Matrix product, A * B, null if matrix dimensions don't agree.
@@ -1467,7 +1467,7 @@ public class Matrix implements Serializable
 
     /**
      * Multiply a matrix by a scalar in place, A = s*A
-     * 
+     *
      * @param s
      *            scalar
      */
@@ -1500,12 +1500,12 @@ public class Matrix implements Serializable
 
     /**
      * Matrix trace.
-     * 
+     *
      * @return sum of the diagonal elements.
      */
     public double trace()
     {
-        final int dim = ((this.m < this.n) ? this.m : this.n);
+        final int dim = this.m < this.n ? this.m : this.n;
         double t = 0;
         for (int i = 0; i < dim; i++)
         {
@@ -1516,7 +1516,7 @@ public class Matrix implements Serializable
 
     /**
      * Matrix transpose.
-     * 
+     *
      * @return new Matrix A'
      */
     public Matrix transpose()
@@ -1550,7 +1550,7 @@ public class Matrix implements Serializable
 
     /**
      * Unary minus
-     * 
+     *
      * @return new Matrix -A
      */
     public Matrix uminus()
