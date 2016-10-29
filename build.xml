@@ -5,13 +5,14 @@
   <property name="version" value="2.0"/>
 
     <target name="clean">
-        <delete dir="bin"/>
-        <delete dir="jar"/>
+        <delete dir="bin" />
+        <delete dir="jar" />
+        <delete dir="docs" />
     </target>
 
     <target name="doc">
-        <mkdir dir="doc" />
-        <javadoc access="public" author="true" classpath="." sourcepath="src" destdir="doc" doctitle="JAMA : A Java Matrix Package"
+        <mkdir dir="docs" />
+        <javadoc access="public" author="true" classpath="." sourcepath="src" destdir="docs" doctitle="JAMA : A Java Matrix Package"
             nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false"
             packagenames="jama2.util,jama2.examples,jama2.test,jama2" source="1.7" splitindex="true" use="true" version="true" />
     </target>
@@ -19,13 +20,12 @@
     
     <target name="compile">
         <mkdir dir="bin" />
-        <javac srcdir="src" destdir="bin" includeantruntime="false" target="1.8" verbose="no" listfiles="no"/>
+        <javac srcdir="src" destdir="bin" includeantruntime="false" target="1.8" verbose="no" listfiles="no" />
     </target>
     
      <target name="jar" depends="compile">
         <mkdir dir="jar" />
-        <jar destfile="jar/Jama.jar" basedir="bin">
-        </jar>
+        <jar destfile="jar/Jama.jar" basedir="bin" />
     </target>
     
     <target name="all" depends="clean,jar" />
