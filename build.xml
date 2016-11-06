@@ -2,7 +2,7 @@
 
 <!-- Build file for JAMA -->
 <project name="JAMA" basedir="." default="all">
-  <property name="version" value="2.0"/>
+  <property name="version" value="2.1"/>
 
     <target name="clean">
         <delete dir="bin" />

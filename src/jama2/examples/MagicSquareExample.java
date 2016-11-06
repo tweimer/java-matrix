@@ -65,7 +65,7 @@ public class MagicSquareExample
     /**
      * Generate magic square test matrix.
      * 
-     * @param n
+     * @param n size of the magic matrix
      * @return Matrix
      **/
     public static Matrix magic(final int n)
@@ -140,13 +140,13 @@ public class MagicSquareExample
     /**
      * Tests LU, QR, SVD and symmetric Eig decompositions.
      * 
-     * n = order of magic square.<br />
-     * trace = diagonal sum, should be the magic sum, (n^3 + n)/2.<br />
-     * max_eig = maximum eigenvalue of (A + A')/2, should equal trace.<br />
+     * n = order of magic square.<br>
+     * trace = diagonal sum, should be the magic sum, (n^3 + n)/2.<br>
+     * max_eig = maximum eigenvalue of (A + A')/2, should equal trace.<br>
      * rank = linear algebraic rank, should equal n if n is odd, be less than n
-     * if n is even.<br />
-     * cond = L_2 condition number, ratio of singular values.<br />
-     * lu_res = test of LU factorization, norm1(L*U-A(p,:))/(n*eps).<br />
+     * if n is even.<br>
+     * cond = L_2 condition number, ratio of singular values.<br>
+     * lu_res = test of LU factorization, norm1(L*U-A(p,:))/(n*eps).<br>
      * qr_res = test of QR factorization, norm1(Q*R-A)/(n*eps).
      * 
      * @param argv

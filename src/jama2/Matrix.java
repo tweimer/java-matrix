@@ -47,7 +47,6 @@ import static java.lang.Math.abs;
  * <DL>
  * <DT><B>Example of use:</B></DT>
  * <DD>Solve a linear system A x = b and compute the residual norm, ||b - A x||.
- * <P>
  *
  * <PRE>
  * double[][] vals = { { 1., 2., 3 }, { 4., 5., 6. }, { 7., 8., 10. } };
@@ -211,7 +210,7 @@ public class Matrix implements Cloneable, Serializable
      * @param input
      *            the input stream.
      * @return Matrix
-     * @throws IOException
+     * @throws IOException if any IOException occurs while reading
      */
     public static Matrix read(final BufferedReader input) throws IOException
     {
@@ -335,16 +334,16 @@ public class Matrix implements Cloneable, Serializable
     }
 
     /**
-     * Construct a matrix from a 2-D array. This does <b>not</b> copy the given
-     * array, it just stores it's reference.
+     * Construct a matrix from a 2-D array.
      *
      * @param A
-     *            Two-dimensional array of doubles.
+     *            Two-dimensional array of doubles. This does <b>not</b> copy the given
+     *            array, it just stores it's reference.
      * @exception IllegalArgumentException
      *                All rows must have the same length
      * @see #constructWithCopy
      */
-    public Matrix(final double A[][])
+    public Matrix(final double[][] A)
     {
         // TODO: how to handle null here?
         this(A.length, A[0].length, A);
@@ -367,9 +366,10 @@ public class Matrix implements Cloneable, Serializable
      * @param n
      *            Number of colums.
      * @param A
-     *            Two-dimensional array of doubles.
+     *            Two-dimensional array of doubles. This does <b>not</b> copy the given
+     *            array, it just stores it's reference.
      */
-    public Matrix(final int m, final int n, final double A[][])
+    public Matrix(final int m, final int n, final double[][] A)
     {
         this.A = A;
         this.m = m;
@@ -651,20 +651,20 @@ public class Matrix implements Cloneable, Serializable
      */
     public boolean equals(final Matrix other)
     {
-        return other == this || other != null && this.m == other.m && this.n == other.n && Arrays.deepEquals(this.A, other.A);
+        return (other == this) || (other != null && this.m == other.m && this.n == other.n && Arrays.deepEquals(this.A, other.A));
     }
 
     /**
-     * Overloads
+     * Compares a Matrix to another Matrix
      *
      * @param obj
-     *            another object
-     * @return true if other equals A
+     *            another Object
+     * @return true if obj is a Matrix and equals A
      */
     @Override
     public boolean equals(final Object obj)
     {
-        return obj instanceof Matrix && this.equals((Matrix) obj);
+        return (obj instanceof Matrix) && this.equals((Matrix) obj);
     }
 
     /**
@@ -770,25 +770,25 @@ public class Matrix implements Cloneable, Serializable
     /**
      * Get a submatrix.
      *
-     * @param i0
+     * @param r0
      *            Initial row index (inclusive)
-     * @param i1
+     * @param r1
      *            Final row index (inclusive)
      * @param c
      *            Array of column indices.
-     * @return A(i0:i1,c(:))
+     * @return A(r0:r1,c(:))
      * @throws ArrayIndexOutOfBoundsException
      *             Submatrix indices
      */
-    public Matrix getMatrix(final int i0, final int i1, final int c[])
+    public Matrix getMatrix(final int r0, final int r1, final int c[])
     {
-        final int m1 = i1 - i0 + 1, n1 = c.length;
+        final int m1 = r1 - r0 + 1, n1 = c.length;
         final Matrix M = new Matrix(m1, n1);
-        for (int i = i0; i <= i1; i++)
+        for (int i = r0; i <= r1; i++)
         {
             for (int j = 0; j < n1; j++)
             {
-                M.A[i - i0][j] = this.A[i][c[j]];
+                M.A[i - r0][j] = this.A[i][c[j]];
             }
         }
         return M;
@@ -797,27 +797,27 @@ public class Matrix implements Cloneable, Serializable
     /**
      * Get a submatrix.
      *
-     * @param i0
+     * @param r0
      *            Initial row index (inclusive)
-     * @param i1
+     * @param r1
      *            Final row index (inclusive)
-     * @param j0
+     * @param c0
      *            Initial column index (inclusive)
-     * @param j1
+     * @param c1
      *            Final column index (inclusive)
-     * @return A(i0:i1,j0:j1)
+     * @return A(r0:r1,c0:c1)
      * @exception ArrayIndexOutOfBoundsException
      *                Submatrix indices
      */
-    public Matrix getMatrix(final int i0, final int i1, final int j0, final int j1)
+    public Matrix getMatrix(final int r0, final int r1, final int c0, final int c1)
     {
-        final int m1 = i1 - i0 + 1, n1 = j1 - j0 + 1;
+        final int m1 = r1 - r0 + 1, n1 = c1 - c0 + 1;
         final Matrix M = new Matrix(m1, n1);
-        for (int i = i0; i <= i1; i++)
+        for (int i = r0; i <= r1; i++)
         {
-            for (int j = j0; j <= j1; j++)
+            for (int j = c0; j <= c1; j++)
             {
-                M.A[i - i0][j - j0] = this.A[i][j];
+                M.A[i - r0][j - c0] = this.A[i][j];
             }
         }
         return M;
@@ -828,23 +828,23 @@ public class Matrix implements Cloneable, Serializable
      *
      * @param r
      *            Array of row indices
-     * @param j0
+     * @param c0
      *            Initial column index (inclusive)
-     * @param j1
+     * @param c1
      *            Final column index (inclusive)
-     * @return A(r(:),j0:j1)
+     * @return A(r(:),c0:c1)
      * @exception ArrayIndexOutOfBoundsException
      *                Submatrix indices
      */
-    public Matrix getMatrix(final int r[], final int j0, final int j1)
+    public Matrix getMatrix(final int r[], final int c0, final int c1)
     {
-        final int m1 = r.length, n1 = j1 - j0 + 1;
+        final int m1 = r.length, n1 = c1 - c0 + 1;
         final Matrix M = new Matrix(m1, n1);
         for (int i = 0; i < m1; i++)
         {
-            for (int j = j0; j <= j1; j++)
+            for (int j = c0; j <= c1; j++)
             {
-                M.A[i][j - j0] = this.A[r[i]][j];
+                M.A[i][j - c0] = this.A[r[i]][j];
             }
         }
         return M;
@@ -1241,8 +1241,8 @@ public class Matrix implements Cloneable, Serializable
     }
 
     /**
-     *
-     * @param s
+     * Sets all values to s
+     * @param s scalar
      */
     public void set(final double s)
     {
@@ -1256,10 +1256,11 @@ public class Matrix implements Cloneable, Serializable
     }
 
     /**
-     *
+     * Sets all values to s
      * @param i
-     *            index
+     *            index (counting by columns)
      * @param s
+     *            scalar
      */
     public void set(final int i, final double s)
     {
@@ -1269,39 +1270,39 @@ public class Matrix implements Cloneable, Serializable
     /**
      * Set a single element.
      *
-     * @param i
+     * @param r
      *            Row index.
-     * @param j
+     * @param c
      *            Column index.
      * @param s
      *            A(i,j).
      */
-    public void set(final int i, final int j, final double s)
+    public void set(final int r, final int c, final double s)
     {
-        this.A[i][j] = s;
+        this.A[r][c] = s;
     }
 
     /**
      * Set a submatrix.
      *
-     * @param i0
+     * @param r0
      *            Initial row index
-     * @param i1
+     * @param r1
      *            Final row index
-     * @param j0
+     * @param c0
      *            Initial column index
-     * @param j1
+     * @param c1
      *            Final column index
      * @param X
-     *            A(i0:i1,j0:j1)
+     *            A(r0:r1,c0:c1)
      */
-    public void setMatrix(final int i0, final int i1, final int j0, final int j1, final Matrix X)
+    public void setMatrix(final int r0, final int r1, final int c0, final int c1, final Matrix X)
     {
-        for (int i = i0; i <= i1; i++)
+        for (int i = r0; i <= r1; i++)
         {
-            for (int j = j0; j <= j1; j++)
+            for (int j = c0; j <= c1; j++)
             {
-                this.A[i][j] = X.A[i - i0][j - j0];
+                this.A[i][j] = X.A[i - r0][j - c0];
             }
         }
     }
@@ -1309,22 +1310,22 @@ public class Matrix implements Cloneable, Serializable
     /**
      * Set a submatrix.
      *
-     * @param i0
+     * @param r0
      *            Initial row index
-     * @param i1
+     * @param r1
      *            Final row index
      * @param c
      *            Array of column indices.
      * @param X
-     *            A(i0:i1,c(:))
+     *            A(r0:r1,c(:))
      */
-    public void setMatrix(final int i0, final int i1, final int c[], final Matrix X)
+    public void setMatrix(final int r0, final int r1, final int c[], final Matrix X)
     {
-        for (int i = i0; i <= i1; i++)
+        for (int i = r0; i <= r1; i++)
         {
             for (int j = 0; j < c.length; j++)
             {
-                this.A[i][c[j]] = X.A[i - i0][j];
+                this.A[i][c[j]] = X.A[i - r0][j];
             }
         }
     }
@@ -1334,20 +1335,20 @@ public class Matrix implements Cloneable, Serializable
      *
      * @param r
      *            Array of row indices.
-     * @param j0
+     * @param c0
      *            Initial column index
-     * @param j1
+     * @param c1
      *            Final column index
      * @param X
-     *            A(r(:),j0:j1)
+     *            A(r(:),c0:c1)
      */
-    public void setMatrix(final int r[], final int j0, final int j1, final Matrix X)
+    public void setMatrix(final int r[], final int c0, final int c1, final Matrix X)
     {
         for (int i = 0; i < r.length; i++)
         {
-            for (int j = j0; j <= j1; j++)
+            for (int j = c0; j <= c1; j++)
             {
-                this.A[r[i]][j] = X.A[i][j - j0];
+                this.A[r[i]][j] = X.A[i][j - c0];
             }
         }
     }

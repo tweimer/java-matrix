@@ -6,9 +6,9 @@ import java.util.Arrays;
 /**
  * LU Decomposition.
  * <P>
- * For an m-by-n matrix A with m >= n, the LU decomposition is an m-by-n unit
+ * For an m-by-n matrix A with m &gt;= n, the LU decomposition is an m-by-n unit
  * lower triangular matrix L, an n-by-n upper triangular matrix U, and a
- * permutation vector piv of length m so that A(piv,:) = L*U. If m < n, then L
+ * permutation vector piv of length m so that A(piv,:) = L*U. If m &lt; n, then L
  * is m-by-m and U is m-by-n.
  * </P>
  * <P>
