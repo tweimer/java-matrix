@@ -1518,28 +1518,14 @@ public class Matrix implements Cloneable, Serializable
     }
     
     /**
-     * Applys the given operator to all elements, modifying this Matrix.
-     * @param operator Operator to be applied
-     * @throws NullPointerException iff operator == null
-     */
-    public void transform(final DoubleUnaryOperator operator)
-    {
-        for (int i = 0; i < this.m; i++)
-        {
-            for (int j = 0; j < this.n; j++)
-            {
-                this.A[i][j] = operator.applyAsDouble(this.A[i][j]);
-            }
-        }
-    }
-    
-    /**
      * Applys the given operator to all elements, returning a new Matrix.
-     * @param operator Operator to be applied
+     * @param operator Operator to be applied to this Matrix and B
      * @return new Matrix with the result
-     * @throws NullPointerException iff operator == null
+     * @throws NullPointerException iff operator == null or B == null
+     * @see {@link #transformEquals(DoubleUnaryOperator)}
+     * to modify this Matrix instead of returning a new one
      */
-    public Matrix transformEquals(final DoubleUnaryOperator operator)
+    public Matrix transform(final DoubleUnaryOperator operator)
     {
         final Matrix M = new Matrix(this.m, this.n);
         for (int i = 0; i < this.m; i++)
@@ -1554,17 +1540,18 @@ public class Matrix implements Cloneable, Serializable
     
     /**
      * Applys the given operator to all elements, modifying this Matrix.
-     * @param B another Matrix
      * @param operator Operator to be applied
      * @throws NullPointerException iff operator == null
+     * @see {@link #transform(DoubleUnaryOperator)}
+     * to return a new Matrix instead of modifying this Matrix
      */
-    public void transform(final Matrix B, final DoubleBinaryOperator operator)
+    public void transformEquals(final DoubleUnaryOperator operator)
     {
         for (int i = 0; i < this.m; i++)
         {
             for (int j = 0; j < this.n; j++)
             {
-                this.A[i][j] = operator.applyAsDouble(this.A[i][j], B.A[i][j]);
+                this.A[i][j] = operator.applyAsDouble(this.A[i][j]);
             }
         }
     }
@@ -1575,8 +1562,10 @@ public class Matrix implements Cloneable, Serializable
      * @param operator Operator to be applied
      * @return new Matrix with the result
      * @throws NullPointerException iff operator == null
+     * @see {@link #transformEquals(Matrix, DoubleBinaryOperator)}
+     * to modify this Matrix instead of returning a new one
      */
-    public Matrix transformEquals(final Matrix B, final DoubleBinaryOperator operator)
+    public Matrix transform(final Matrix B, final DoubleBinaryOperator operator)
     {
         final Matrix M = new Matrix(this.m, this.n);
         for (int i = 0; i < this.m; i++)
@@ -1587,6 +1576,25 @@ public class Matrix implements Cloneable, Serializable
             }
         }
         return M;
+    }
+    
+    /**
+     * Applys the given operator to all elements, modifying this Matrix.
+     * @param B another Matrix
+     * @param operator Operator to be applied to this Matrix and B
+     * @throws NullPointerException iff operator == null or B == null
+     * @see {@link #transform(Matrix, DoubleBinaryOperator)}
+     * to return a new Matrix instead of modifying this Matrix
+     */
+    public void transformEquals(final Matrix B, final DoubleBinaryOperator operator)
+    {
+        for (int i = 0; i < this.m; i++)
+        {
+            for (int j = 0; j < this.n; j++)
+            {
+                this.A[i][j] = operator.applyAsDouble(this.A[i][j], B.A[i][j]);
+            }
+        }
     }
 
     /**
