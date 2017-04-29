@@ -214,7 +214,7 @@ public class TestMatrix
     }
 
     /**
-     * @param argv
+     * @param argv unused
      */
     public static void main(final String argv[])
     {
