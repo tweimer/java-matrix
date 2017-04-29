@@ -1531,6 +1531,25 @@ public class Matrix implements Cloneable, Serializable
             }
         }
     }
+    
+    /**
+     * Applys the given operator to all elements, returning a new Matrix.
+     * @param operator Operator to be applied
+     * @return new Matrix with the result
+     * @throws NullPointerException iff operator == null
+     */
+    public Matrix transformEquals(final DoubleUnaryOperator operator)
+    {
+        final Matrix M = new Matrix(this.m, this.n);
+        for (int i = 0; i < this.m; i++)
+        {
+            for (int j = 0; j < this.n; j++)
+            {
+                M.A[i][j] = operator.applyAsDouble(this.A[i][j]);
+            }
+        }
+        return M;
+    }
 
     /**
      * Matrix transpose.
