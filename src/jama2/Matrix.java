@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Vector;
+import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 
 import static jama2.util.Maths.hypot;
@@ -1549,6 +1550,23 @@ public class Matrix implements Cloneable, Serializable
             }
         }
         return M;
+    }
+    
+    /**
+     * Applys the given operator to all elements, modifying this Matrix.
+     * @param B another Matrix
+     * @param operator Operator to be applied
+     * @throws NullPointerException iff operator == null
+     */
+    public void transform(final Matrix B, final DoubleBinaryOperator operator)
+    {
+        for (int i = 0; i < this.m; i++)
+        {
+            for (int j = 0; j < this.n; j++)
+            {
+                this.A[i][j] = operator.applyAsDouble(this.A[i][j], B.A[i][j]);
+            }
+        }
     }
 
     /**
