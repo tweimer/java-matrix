@@ -9,6 +9,8 @@ Capabilities
 JAMA is comprised of six Java classes: Matrix, CholeskyDecomposition, LUDecomposition, QRDecomposition, SingularValueDecomposition and EigenvalueDecomposition.
 The Matrix class provides the fundamental operations of numerical linear algebra. Various constructors create Matrices from two dimensional arrays of double precision floating point numbers. Various gets and sets provide access to submatrices and matrix elements. The basic arithmetic operations include matrix addition and multiplication, matrix norms and selected element-by-element array operations. A convenient matrix print method is also included.
 
+There are methods to apply elementary functions (e.g. Math::sin, Math::exp, Math::log) on a single matrix elementwise, as well as to apply binary function on two matrices elementwise (both called transform). They can easily be used with lambda expressions in Java 8.
+
 Five fundamental matrix decompositions, which consist of pairs or triples of matrices, permutation vectors, and the like, produce results in five decomposition classes. These decompositions are accessed by the Matrix class to compute solutions of simultaneous linear equations, determinants, inverses and other matrix functions. The five decompositions are:
 * Cholesky Decomposition of symmetric, positive definite matrices
 * LU Decomposition (Gaussian elimination) of rectangular matrices
@@ -26,7 +28,7 @@ The implementation of JAMA downloadable from this site is meant to be a referenc
 Not Covered
 =============
 JAMA is by no means a complete linear algebra environment. For example, there are no provisions for matrices with particular structure (e.g., banded, sparse) or for more specialized decompositions (e.g. Shur, generalized eigenvalue). Complex matrices are not included. It is not our intention to ignore these important problems. We expect that some of these (e.g. complex) will be addressed in future versions. It is our intent that the design of JAMA not preclude extension to some of these additional areas.
-Finally, JAMA is not a general-purpose array class. Instead, it focuses on the principle mathematical functionality required to do numerical linear algebra. As a result, there are no methods for array operations such as reshaping or applying elementary functions (e.g. sine, exp, log) elementwise. Such operations, while quite useful in many applications, are best collected into a separate array class.
+Finally, JAMA is not a general-purpose array class. Instead, it focuses on the principle mathematical functionality required to do numerical linear algebra.
 
 
 Authors
