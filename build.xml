@@ -28,7 +28,7 @@
         <jar destfile="jar/Jama.jar" basedir="bin" />
     </target>
     
-    <target name="all" depends="clean,jar" />
+    <target name="all" depends="clean,jar,doc" />
     
     <target name="release" depends="jar">
         <tar basedir="jar" destfile="Jama-${version}.tar" compression="none" />
