@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.Vector;
 import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoublePredicate;
 import java.util.function.DoubleUnaryOperator;
 
 import static jama2.util.Maths.hypot;
@@ -440,6 +441,53 @@ public class Matrix implements Cloneable, Serializable
     public Matrix(final Matrix X)
     {
         this(X.m, X.n, X.getArrayCopy());
+    }
+    
+    /**
+     * Returns true if all elements of the Matrix match the provided predicate.
+     * This uses lazy evaluation.
+     * @param predicate A predicate to test all elements of the Matrix
+     * @return True if all elements match the given predicate, false otherwise.
+     * @throws NullPointerException iff predicate == null
+     * @see #anyMatch(DoublePredicate)
+     */
+    public boolean allMatch(final DoublePredicate predicate)
+    {
+        for (final double[] row : this.A)
+        {
+            for (final double d : row)
+            {
+                if (!predicate.test(d))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+
+    /**
+     * Returns true if alny element of the Matrix matches the provided predicate.
+     * This uses lazy evaluation.
+     * @param predicate A predicate to test all elements of the Matrix
+     * @return True if any element matches the given predicate, false otherwise.
+     * @throws NullPointerException iff predicate == null
+     * @see #allMatch(DoublePredicate)
+     */
+    public boolean anyMatch(final DoublePredicate predicate)
+    {
+        for (final double[] row : this.A)
+        {
+            for (final double d : row)
+            {
+                if (predicate.test(d))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
