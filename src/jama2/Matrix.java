@@ -938,12 +938,7 @@ public class Matrix implements Cloneable, Serializable
     @Override
     public int hashCode()
     {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Arrays.hashCode(this.A);
-        result = prime * result + this.m;
-        result = prime * result + this.n;
-        return result;
+        return Arrays.deepHashCode(this.A);
     }
 
     /**
