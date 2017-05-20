@@ -16,8 +16,7 @@ import java.text.DecimalFormat;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  **/
-public class MagicSquareExample
-{
+public class MagicSquareExample {
     /**
      * Format double with Fw.d.
      * 
@@ -28,16 +27,14 @@ public class MagicSquareExample
      * @param d
      *            fraction digits
      * @return formatted String
-     * **/
-    public static String fixedWidthDoubletoString(final double x, final int w, final int d)
-    {
+     **/
+    public static String fixedWidthDoubletoString(final double x, final int w, final int d) {
         final DecimalFormat fmt = new DecimalFormat();
         fmt.setMaximumFractionDigits(d);
         fmt.setMinimumFractionDigits(d);
         fmt.setGroupingUsed(false);
         String s = fmt.format(x);
-        while (s.length() < w)
-        {
+        while (s.length() < w) {
             s = " " + s; //$NON-NLS-1$
         }
         return s;
@@ -52,11 +49,9 @@ public class MagicSquareExample
      *            width
      * @return formatted String
      **/
-    public static String fixedWidthIntegertoString(final int n, final int w)
-    {
+    public static String fixedWidthIntegertoString(final int n, final int w) {
         String s = Integer.toString(n);
-        while (s.length() < w)
-        {
+        while (s.length() < w) {
             s = " " + s; //$NON-NLS-1$
         }
         return s;
@@ -65,62 +60,51 @@ public class MagicSquareExample
     /**
      * Generate magic square test matrix.
      * 
-     * @param n size of the magic matrix
+     * @param n
+     *            size of the magic matrix
      * @return Matrix
      **/
-    public static Matrix magic(final int n)
-    {
+    public static Matrix magic(final int n) {
 
         final double[][] M = new double[n][n];
 
         // Odd order
-        if ((n % 2) != 0)
-        {
+        if ((n % 2) != 0) {
             final int b = (n + 1), a = b / 2;
-            for (int j = 0; j < n; j++)
-            {
-                for (int i = 0; i < n; i++)
-                {
+            for (int j = 0; j < n; j++) {
+                for (int i = 0; i < n; i++) {
                     M[i][j] = (n * ((i + j + a) % n)) + ((i + (2 * j) + b) % n) + 1;
                 }
             }
         }
         // Doubly Even Order
-        else if ((n % 4) == 0)
-        {
-            for (int j = 0; j < n; j++)
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    M[i][j] = ((((i + 1) / 2) % 2) == (((j + 1) / 2) % 2)) ? ((n * n) - (n * i) - j) : ((n * i) + j + 1);
+        else if ((n % 4) == 0) {
+            for (int j = 0; j < n; j++) {
+                for (int i = 0; i < n; i++) {
+                    M[i][j] = ((((i + 1) / 2) % 2) == (((j + 1) / 2) % 2)) ? ((n * n) - (n * i) - j)
+                            : ((n * i) + j + 1);
                 }
             }
         }
         // Singly Even Order
-        else
-        {
+        else {
             final int p = n / 2, k = (n - 2) / 4;
             final Matrix A = MagicSquareExample.magic(p);
-            for (int j = 0; j < p; j++)
-            {
-                for (int i = 0; i < p; i++)
-                {
+            for (int j = 0; j < p; j++) {
+                for (int i = 0; i < p; i++) {
                     final double aij = M[i][j] = A.get(i, j);
                     M[i][j + p] = aij + (2 * p * p);
                     M[i + p][j] = aij + (3 * p * p);
                     M[i + p][j + p] = aij + (p * p);
                 }
             }
-            for (int i = 0; i < p; i++)
-            {
-                for (int j = 0; j < k; j++)
-                {
+            for (int i = 0; i < p; i++) {
+                for (int j = 0; j < k; j++) {
                     final double t = M[i][j];
                     M[i][j] = M[i + p][j];
                     M[i + p][j] = t;
                 }
-                for (int j = (n - k) + 1; j < n; j++)
-                {
+                for (int j = (n - k) + 1; j < n; j++) {
                     final double t = M[i][j];
                     M[i][j] = M[i + p][j];
                     M[i + p][j] = t;
@@ -152,15 +136,13 @@ public class MagicSquareExample
      * @param argv
      *            unused
      */
-    public static void main(final String argv[])
-    {
+    public static void main(final String argv[]) {
         System.out.println("\n    Test of Matrix Class, using magic squares."); //$NON-NLS-1$
         System.out.println("    See MagicSquareExample.main() for an explanation."); //$NON-NLS-1$
         System.out.println("\n      n     trace       max_eig   rank        cond      lu_res      qr_res\n"); //$NON-NLS-1$
 
         final long start_time = System.currentTimeMillis();
-        for (int n = 3; n <= 32; n++)
-        {
+        for (int n = 3; n <= 32; n++) {
             System.out.print(MagicSquareExample.fixedWidthIntegertoString(n, 7));
 
             final Matrix M = MagicSquareExample.magic(n);
@@ -195,7 +177,8 @@ public class MagicSquareExample
         }
         final long stop_time = System.currentTimeMillis();
         final double etime = (stop_time - start_time) / 1000.;
-        System.out.println("\nElapsed Time = " + MagicSquareExample.fixedWidthDoubletoString(etime, 12, 3) + " seconds"); //$NON-NLS-1$ //$NON-NLS-2$
+        System.out.println("\nElapsed Time = " //$NON-NLS-1$
+                + MagicSquareExample.fixedWidthDoubletoString(etime, 12, 3) + " seconds"); //$NON-NLS-1$
         System.out.println("Adios"); //$NON-NLS-1$
     }
 

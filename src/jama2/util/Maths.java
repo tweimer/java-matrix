@@ -11,8 +11,7 @@ import static java.lang.Math.sqrt;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class Maths
-{
+public class Maths {
     /**
      * 
      */
@@ -25,21 +24,15 @@ public class Maths
      * @param b
      * @return hypot
      **/
-    public static double hypot(final double a, final double b)
-    {
+    public static double hypot(final double a, final double b) {
         final double r;
-        if (abs(a) > abs(b))
-        {
+        if (abs(a) > abs(b)) {
             r = b / a;
             return abs(a) * sqrt(1 + (r * r));
-        }
-        else if (b != 0)
-        {
+        } else if (b != 0) {
             r = a / b;
             return abs(b) * sqrt(1 + (r * r));
-        }
-        else
-        {
+        } else {
             return 0D;
         }
     }
@@ -52,8 +45,7 @@ public class Maths
      * @param r
      * @return hypot
      */
-    public static double hypot(final double p, final double q, final double r)
-    {
+    public static double hypot(final double p, final double q, final double r) {
         return sqrt((p * p) + (q * q) + (r * r));
     }
 
@@ -65,8 +57,7 @@ public class Maths
      * @param r
      * @return norm1
      */
-    public static double norm1(final double p, final double q, final double r)
-    {
+    public static double norm1(final double p, final double q, final double r) {
         return abs(p) + abs(q) + abs(r);
     }
 }
