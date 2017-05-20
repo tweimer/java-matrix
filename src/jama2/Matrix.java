@@ -698,6 +698,7 @@ public class Matrix implements Cloneable, Serializable
      * @param other
      *            another Matrix
      * @return true if other equals A
+     * @see java.util.Arrays.deepEquals(Object[])
      */
     public boolean equals(final Matrix other)
     {
@@ -935,6 +936,9 @@ public class Matrix implements Cloneable, Serializable
         return this.m;
     }
 
+    /**
+     * Returns a deep hash code for this Matrix.
+     */
     @Override
     public int hashCode()
     {
@@ -966,6 +970,15 @@ public class Matrix implements Cloneable, Serializable
         final Matrix I = new Matrix(this.m);
         I.identity();
         return this.solve(I);
+    }
+    
+    /**
+     * Checks is this Matrix is square
+     * @return true iff this Matrix is square, false otherwise.
+     */
+    public boolean isSquare()
+    {
+        return this.m== this.n;
     }
 
     /**
