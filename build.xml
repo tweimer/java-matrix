@@ -14,13 +14,13 @@
         <mkdir dir="docs" />
         <javadoc access="public" author="true" classpath="." sourcepath="src" destdir="docs" doctitle="JAMA : A Java Matrix Package"
             nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false"
-            packagenames="jama2.util,jama2.examples,jama2.test,jama2" source="1.7" splitindex="true" use="true" version="true" />
+            packagenames="jama2.util,jama2.examples,jama2" source="1.9" splitindex="true" use="true" version="true" />
     </target>
     
     
     <target name="compile">
         <mkdir dir="bin" />
-        <javac srcdir="src" destdir="bin" includeantruntime="false" target="1.8" verbose="no" listfiles="no" />
+        <javac srcdir="src" destdir="bin" excludes="jama2/test/*" includeantruntime="false" target="1.9" source="1.9" verbose="no" listfiles="no" />
     </target>
     
      <target name="jar" depends="compile">
