@@ -20,8 +20,8 @@ public class Maths {
     /**
      * sqrt(a^2 + b^2) without under/overflow.
      * 
-     * @param a
-     * @param b
+     * @param a cathesus
+     * @param b cathesus
      * @return hypot
      **/
     public static double hypot(final double a, final double b) {
@@ -40,9 +40,9 @@ public class Maths {
     /**
      * sqrt(p^2+q^2+r^2)
      * 
-     * @param p
-     * @param q
-     * @param r
+     * @param p cathesus
+     * @param q cathesus
+     * @param r cathesus
      * @return hypot
      */
     public static double hypot(final double p, final double q, final double r) {
@@ -52,9 +52,9 @@ public class Maths {
     /**
      * abs(p)+abs(q)+abs(r)
      * 
-     * @param p
-     * @param q
-     * @param r
+     * @param p cathesus
+     * @param q cathesus
+     * @param r cathesus
      * @return norm1
      */
     public static double norm1(final double p, final double q, final double r) {

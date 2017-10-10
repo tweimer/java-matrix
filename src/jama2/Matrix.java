@@ -227,7 +227,7 @@ public class Matrix implements Cloneable, Serializable {
         final Vector<Double> vD = new Vector<>();
         do {
             // Read & store 1st row.
-            vD.addElement(new Double(tokenizer.sval));
+            vD.addElement(Double.valueOf(tokenizer.sval));
         } while (tokenizer.nextToken() == StreamTokenizer.TT_WORD);
 
         // Now we've got the number of columns!
@@ -427,7 +427,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Returns true if alny element of the Matrix matches the provided
+     * Returns true if any element of the Matrix matches the provided
      * predicate. This uses lazy evaluation.
      * 
      * @param predicate
@@ -629,7 +629,6 @@ public class Matrix implements Cloneable, Serializable {
      * @param other
      *            another Matrix
      * @return true if other equals A
-     * @see java.util.Arrays.deepEquals(Object[])
      */
     public boolean equals(final Matrix other) {
         return (other == this)
@@ -843,6 +842,7 @@ public class Matrix implements Cloneable, Serializable {
 
     /**
      * Returns a deep hash code for this Matrix.
+     * @return hash code
      */
     @Override
     public int hashCode() {
@@ -873,7 +873,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Checks is this Matrix is square
+     * Checks if this Matrix is square
      * 
      * @return true iff this Matrix is square, false otherwise.
      */
@@ -1374,6 +1374,10 @@ public class Matrix implements Cloneable, Serializable {
         }
     }
 
+    /**
+     * Returns a human-readable representation of this Matrix, with each value in a row separated by tabulator
+     * @return String representation 
+     */
     @Override
     public String toString() {
         final StringBuffer st = new StringBuffer();
@@ -1402,7 +1406,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Applys the given operator to all elements, returning a new Matrix.
+     * Applies the given operator to all elements, returning a new Matrix.
      * 
      * @param operator
      *            Operator to be applied to this Matrix and B
@@ -1422,7 +1426,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Applys the given operator to all elements, modifying this Matrix.
+     * Applies the given operator to all elements, modifying this Matrix.
      * 
      * @param operator
      *            Operator to be applied
@@ -1439,7 +1443,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Applys the given operator to all elements, returning a new Matrix.
+     * Applies the given operator to all elements, returning a new Matrix.
      * 
      * @param B
      *            another Matrix
@@ -1461,7 +1465,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Applys the given operator to all elements, modifying this Matrix.
+     * Applies the given operator to all elements, modifying this Matrix.
      * 
      * @param B
      *            another Matrix
