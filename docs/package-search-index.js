@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"jama2"},{"l":"jama2.examples"},{"l":"jama2.util"}]
+packageSearchIndex = [{"m":"java.math","l":"jama2"},{"m":"java.math","l":"jama2.examples"},{"m":"java.math","l":"jama2.util"}]
