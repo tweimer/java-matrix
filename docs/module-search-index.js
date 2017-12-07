@@ -1,1 +1,1 @@
-moduleSearchIndex = [{"l":"java.math"}]
+moduleSearchIndex = [{"l":"jama.math"}]
