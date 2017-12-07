@@ -11,8 +11,9 @@
     </target>
 
     <target name="doc">
+        <delete dir="docs" />
         <mkdir dir="docs" />
-        <javadoc access="public" author="true" classpath="." sourcepath="src" destdir="docs" doctitle="JAMA : A Java Matrix Package"
+        <javadoc access="package" author="true" classpath="." sourcepath="src" destdir="docs" doctitle="JAMA : A Java Matrix Package"
             nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false"
             packagenames="jama2.util,jama2.examples,jama2" source="1.9" splitindex="true" use="true" version="true" />
     </target>
