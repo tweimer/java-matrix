@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.Vector;
 import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleFunction;
 import java.util.function.DoublePredicate;
 import java.util.function.DoubleUnaryOperator;
 
@@ -62,15 +63,21 @@ import static java.lang.Math.abs;
  *
  * </DD>
  * </DL>
+ * 
+ * <P>
+ * Note that this class is <b>mutable</b> and none of it's methods are synchronized.
+ * Be careful using it from different threads.
+ * </P>
  *
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class Matrix implements Cloneable, Serializable {
+public class Matrix implements IMatrix, Cloneable, Serializable {
+    
     /**
-     * For the Serializeable interface
+     * For the Serializeable interface.
      */
     private static final long serialVersionUID = 1;
 
@@ -83,10 +90,10 @@ public class Matrix implements Cloneable, Serializable {
      * @exception IllegalArgumentException
      *                All rows must have the same length
      */
-    public static Matrix constructWithCopy(final double A[][]) {
+    public static Matrix constructWithCopy(final double[][] A) {
         final int m = A.length;
         final int n = A[0].length;
-        final double C[][] = new double[m][];
+        final double[][] C = new double[m][];
         for (int i = 0; i < C.length; i++) {
             if (A[i].length != n) {
                 throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
@@ -98,7 +105,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a diagonal Matrix
+     * Creates a diagonal Matrix.
      *
      * @param d
      *            diagonal elements
@@ -113,7 +120,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Generate identity matrix
+     * Generate identity matrix.
      *
      * @param m
      *            Number of rows and colums.
@@ -124,7 +131,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Generate identity matrix
+     * Generate identity matrix.
      *
      * @param m
      *            Number of rows.
@@ -139,7 +146,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Generate matrix with random elements
+     * Generate matrix with random elements.
      *
      * @param n
      *            Number of rows and colums.
@@ -150,7 +157,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Generate matrix with random elements
+     * Generate matrix with random elements.
      *
      * @param m
      *            Number of rows.
@@ -165,7 +172,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Generate matrix with random elements
+     * Generate matrix with random elements.
      *
      * @param n
      *            Number of rows and colums.
@@ -176,7 +183,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Generate matrix with random elements
+     * Generate matrix with random elements.
      *
      * @param m
      *            Number of rows.
@@ -232,7 +239,7 @@ public class Matrix implements Cloneable, Serializable {
 
         // Now we've got the number of columns!
         final int n = vD.size();
-        double row[] = new double[n];
+        double[] row = new double[n];
         int j = 0;
         for (final Double d : vD) {
             // extract the elements of the 1st row.
@@ -271,7 +278,7 @@ public class Matrix implements Cloneable, Serializable {
      *
      * @serial internal array storage.
      */
-    private final double A[][];
+    private final double[][] A;
 
     /**
      * Row and column dimensions.
@@ -282,7 +289,7 @@ public class Matrix implements Cloneable, Serializable {
     private final int m, n;
 
     /**
-     * Construct a matrix from a one-dimensional packed array
+     * Construct a matrix from a one-dimensional packed array.
      *
      * @param vals
      *            One-dimensional array of doubles, packed by columns (ala
@@ -292,7 +299,7 @@ public class Matrix implements Cloneable, Serializable {
      * @throws IllegalArgumentException
      *             Array length must be a multiple of m.
      */
-    public Matrix(final double vals[], final int m) {
+    public Matrix(final double[] vals, final int m) {
         this.n = m != 0 ? vals.length / m : 0;
         if (m * this.n != vals.length) {
             throw new IllegalArgumentException("Array length must be a multiple of m."); //$NON-NLS-1$
@@ -312,16 +319,18 @@ public class Matrix implements Cloneable, Serializable {
      * @param A
      *            Two-dimensional array of doubles. This does <b>not</b> copy
      *            the given array, it just stores it's reference.
+     *            You should avoid modifying that array afterwards,
+     *            as this matrix is backed by that array
      * @exception IllegalArgumentException
      *                All rows must have the same length
-     * @see #constructWithCopy
+     * @see #constructWithCopy 
      */
     public Matrix(final double[][] A) {
         // TODO: how to handle null here?
         this(A.length, A[0].length, A);
 
         // check if each row has the same length
-        for (final double r[] : this.A) {
+        for (double[] r : this.A) {
             if (r.length != this.n) {
                 throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
             }
@@ -338,6 +347,8 @@ public class Matrix implements Cloneable, Serializable {
      * @param A
      *            Two-dimensional array of doubles. This does <b>not</b> copy
      *            the given array, it just stores it's reference.
+     *            You should avoid modifying that array afterwards,
+     *            as this matrix is backed by that array
      */
     public Matrix(final int m, final int n, final double[][] A) {
         this.A = A;
@@ -353,7 +364,7 @@ public class Matrix implements Cloneable, Serializable {
      * @param A
      *            Two-dimensional array of doubles.
      */
-    public Matrix(final int n, final double A[][]) {
+    public Matrix(final int n, final double[][] A) {
         this(n, n, A);
     }
 
@@ -395,7 +406,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Copies Matrix X
+     * Copies Matrix X.
      *
      * @param X
      *            Matrix to be copied
@@ -403,11 +414,55 @@ public class Matrix implements Cloneable, Serializable {
     public Matrix(final Matrix X) {
         this(X.m, X.n, X.getArrayCopy());
     }
+    
+
+   /**
+    * This is used to build a Matrix with a functional interface.
+    *
+    * @param m
+    *            Number of rows.
+    * @param n
+    *            Number of colums.
+    * @param matrix
+    *            A lambda expression that describes the given Matrix.
+    *            It must return valid numbers within the given number of rows and columns.
+    *            Any {@link RuntimeException} in {@link IMatrix#get(int, int)} is thrown back to the caller.
+    */
+    public Matrix(final int m, final int n, IMatrix matrix) {
+        this(n, m);
+        for (int i = 0; i < this.A.length; i++) {
+            for (int j = 0; j < this.A[i].length; j++) {
+                this.A[i][j] = matrix.get(i, j);
+            }
+        }
+    }
+
+    /**
+     * This is used to build a Matrix with a functional interface.
+     *
+     * @param m
+     *            Number of rows.
+     * @param n
+     *            Number of colums.
+     * @param matrix
+     *            A lambda expression that describes the given Matrix.
+     *            It must return valid numbers within the given number of rows and columns.
+     *            Any {@link RuntimeException} in {@link IMatrix#get(int, int)} is thrown back to the caller.
+     * @param f This is applied after parameter matrix is evaluated.
+     */
+     public Matrix(final int m, final int n, IMatrix matrix, DoubleUnaryOperator f) {
+         this(n, m);
+         for (int i = 0; i < this.A.length; i++) {
+             for (int j = 0; j < this.A[i].length; j++) {
+                 this.A[i][j] = f.applyAsDouble(matrix.get(i, j));
+             }
+         }
+     }
 
     /**
      * Returns true if all elements of the Matrix match the provided predicate.
      * This uses lazy evaluation.
-     * 
+     *
      * @param predicate
      *            A predicate to test all elements of the Matrix
      * @return True if all elements match the given predicate, false otherwise.
@@ -429,7 +484,7 @@ public class Matrix implements Cloneable, Serializable {
     /**
      * Returns true if any element of the Matrix matches the provided
      * predicate. This uses lazy evaluation.
-     * 
+     *
      * @param predicate
      *            A predicate to test all elements of the Matrix
      * @return True if any element matches the given predicate, false otherwise.
@@ -449,7 +504,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Element-by-element left division, C = A.\B
+     * Element-by-element left division, C = A.\B.
      *
      * @param B
      *            another matrix
@@ -467,7 +522,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Element-by-element left division in place, A = A.\B
+     * Element-by-element left division in place, A = A.\B.
      *
      * @param B
      *            another matrix
@@ -482,7 +537,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Element-by-element right division, C = A./B
+     * Element-by-element right division, C = A./B.
      *
      * @param B
      *            another matrix
@@ -500,7 +555,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Element-by-element right division in place, A = A./B
+     * Element-by-element right division in place, A = A./B.
      *
      * @param B
      *            another matrix
@@ -515,7 +570,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Element-by-element multiplication, C = A.*B
+     * Element-by-element multiplication, C = A.*B.
      *
      * @param B
      *            another matrix
@@ -534,7 +589,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Element-by-element multiplication in place, A = A.*B
+     * Element-by-element multiplication in place, A = A.*B.
      *
      * @param B
      *            another matrix
@@ -550,9 +605,9 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Check if size(A) == size(B)
+     * Check if size(A) == size(B).
      *
-     * @param B
+     * @param B another Matrix
      * @throws IllegalArgumentException
      *             if they don't agree.
      */
@@ -563,7 +618,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Compares dimension of both matrices
+     * Compares dimension of both matrices.
      *
      * @param B
      *            another Matrix
@@ -575,7 +630,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Cholesky Decomposition
+     * Cholesky Decomposition.
      *
      * @return CholeskyDecomposition
      * @see CholeskyDecomposition
@@ -585,7 +640,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Matrix condition (2 norm)
+     * Matrix condition (2 norm).
      *
      * @return ratio of largest to smallest singular value.
      * @see SingularValueDecomposition#cond()
@@ -595,9 +650,10 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Returns a copy of the matrix. Calls {@link #Matrix(Matrix)}
+     * Returns a copy of the matrix.
      *
      * @return copy of this Matrix
+     * @see #Matrix(Matrix)
      */
     @Override
     public Matrix clone() {
@@ -605,7 +661,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Matrix determinant
+     * Matrix determinant.
      *
      * @return determinant
      */
@@ -614,7 +670,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Eigenvalue Decomposition
+     * Eigenvalue Decomposition.
      *
      * @return EigenvalueDecomposition
      * @see EigenvalueDecomposition
@@ -624,7 +680,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Compares a Matrix to another Matrix
+     * Compares a Matrix to another Matrix.
      *
      * @param other
      *            another Matrix
@@ -636,7 +692,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Compares a Matrix to another Matrix
+     * Compares a Matrix to another Matrix.
      *
      * @param obj
      *            another Object
@@ -648,7 +704,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Returns index at index i, row-by-row (MATLAB like)
+     * Returns index at index i, row-by-row (MATLAB like).
      *
      * @param i
      *            index
@@ -669,12 +725,15 @@ public class Matrix implements Cloneable, Serializable {
      * @throws ArrayIndexOutOfBoundsException
      *             if indices are invalid
      */
+    @Override
     public double get(final int i, final int j) {
         return this.A[i][j];
     }
 
     /**
      * Access the internal two-dimensional array.
+     * You should avoid modifying the returned array,
+     * as this matrix is backed by that array
      *
      * @return Pointer to the two-dimensional array of matrix elements.
      */
@@ -688,7 +747,7 @@ public class Matrix implements Cloneable, Serializable {
      * @return Two-dimensional array copy of matrix elements.
      */
     public double[][] getArrayCopy() {
-        final double C[][] = new double[this.m][];
+        final double[][] C = new double[this.m][];
         for (int i = 0; i < C.length; i++) {
             C[i] = Arrays.copyOf(this.A[i], this.n);
         }
@@ -710,7 +769,7 @@ public class Matrix implements Cloneable, Serializable {
      * @return Matrix elements packed in a one-dimensional array by columns.
      */
     public double[] getColumnPackedCopy() {
-        final double vals[] = new double[this.m * this.n];
+        final double[] vals = new double[this.m * this.n];
         for (int i = 0; i < this.m; i++) {
             for (int j = 0; j < this.n; j++) {
                 vals[i + j * this.m] = this.A[i][j];
@@ -725,10 +784,10 @@ public class Matrix implements Cloneable, Serializable {
      * @return Matrix elements packed in a one-dimensional array by rows.
      */
     public double[] getRowPackedCopy() {
-        final double vals[] = new double[this.m * this.n];
+        final double[] vals = new double[this.m * this.n];
         int i = 0;
-        for (final double row[] : this.A) {
-            for (final double d : row) {
+        for (double[] row : this.A) {
+            for (double d : row) {
                 vals[i++] = d;
             }
         }
@@ -748,7 +807,7 @@ public class Matrix implements Cloneable, Serializable {
      * @throws ArrayIndexOutOfBoundsException
      *             Submatrix indices
      */
-    public Matrix getMatrix(final int r0, final int r1, final int c[]) {
+    public Matrix getMatrix(final int r0, final int r1, final int[] c) {
         final int m1 = r1 - r0 + 1, n1 = c.length;
         final Matrix M = new Matrix(m1, n1);
         for (int i = r0; i <= r1; i++) {
@@ -850,7 +909,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Makes the identity matrix
+     * Makes the identity matrix.
      */
     public void identity() {
         for (int i = 0; i < this.A.length; i++) {
@@ -861,7 +920,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Matrix inverse or pseudoinverse
+     * Matrix inverse or pseudoinverse.
      *
      * @return inverse(A) if A is square, pseudoinverse otherwise.
      * @see #solve
@@ -873,8 +932,8 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Checks if this Matrix is square
-     * 
+     * Checks if this Matrix is square.
+     *
      * @return true iff this Matrix is square, false otherwise.
      */
     public boolean isSquare() {
@@ -882,7 +941,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * LU Decomposition
+     * LU Decomposition.
      *
      * @return LUDecomposition
      * @see LUDecomposition
@@ -892,7 +951,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * C = A - B
+     * C = A - B.
      *
      * @param B
      *            another matrix
@@ -911,7 +970,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * A = A - B
+     * A = A - B.
      *
      * @param B
      *            another matrix
@@ -927,7 +986,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * One norm
+     * One norm.
      *
      * @return maximum column sum.
      */
@@ -946,7 +1005,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Two norm
+     * Two norm.
      *
      * @return maximum singular value.
      */
@@ -955,7 +1014,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Frobenius norm
+     * Frobenius norm.
      *
      * @return sqrt of sum of squares of all elements.
      */
@@ -970,7 +1029,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Infinity norm
+     * Infinity norm.
      *
      * @return maximum row sum.
      */
@@ -989,7 +1048,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * C = A + B
+     * C = A + B.
      *
      * @param B
      *            another matrix
@@ -1008,7 +1067,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * A = A + B
+     * A = A + B.
      *
      * @param B
      *            another matrix
@@ -1058,7 +1117,7 @@ public class Matrix implements Cloneable, Serializable {
         // start on new line.
         output.println();
 
-        for (final double row[] : this.A) {
+        for (final double[] row : this.A) {
             for (final double d : row) {
                 // format the number
                 final String s = format.format(d);
@@ -1117,7 +1176,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * QR Decomposition
+     * QR Decomposition.
      *
      * @return QRDecomposition
      * @see QRDecomposition
@@ -1127,7 +1186,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a random Matrix
+     * Creates a random Matrix.
      */
     public void random() {
         final Random rnd = new Random();
@@ -1139,7 +1198,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a random Matrix
+     * Creates a random Matrix.
      */
     public void randomInt() {
         final Random rnd = new Random();
@@ -1151,7 +1210,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Matrix rank
+     * Matrix rank.
      *
      * @return effective numerical rank, obtained from SVD.
      * @see SingularValueDecomposition#rank
@@ -1161,8 +1220,8 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Sets all values to s
-     * 
+     * Sets all values to s.
+     *
      * @param s
      *            scalar
      */
@@ -1175,8 +1234,8 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Sets all values to s
-     * 
+     * Sets all values to s.
+     *
      * @param i
      *            index (counting by columns)
      * @param s
@@ -1234,7 +1293,7 @@ public class Matrix implements Cloneable, Serializable {
      * @param X
      *            A(r0:r1,c(:))
      */
-    public void setMatrix(final int r0, final int r1, final int c[], final Matrix X) {
+    public void setMatrix(final int r0, final int r1, final int[] c, final Matrix X) {
         for (int i = r0; i <= r1; i++) {
             for (int j = 0; j < c.length; j++) {
                 this.A[i][c[j]] = X.A[i - r0][j];
@@ -1254,7 +1313,7 @@ public class Matrix implements Cloneable, Serializable {
      * @param X
      *            A(r(:),c0:c1)
      */
-    public void setMatrix(final int r[], final int c0, final int c1, final Matrix X) {
+    public void setMatrix(final int[] r, final int c0, final int c1, final Matrix X) {
         for (int i = 0; i < r.length; i++) {
             for (int j = c0; j <= c1; j++) {
                 this.A[r[i]][j] = X.A[i][j - c0];
@@ -1272,7 +1331,7 @@ public class Matrix implements Cloneable, Serializable {
      * @param X
      *            A(r(:),c(:))
      */
-    public void setMatrix(final int r[], final int c[], final Matrix X) {
+    public void setMatrix(final int[] r, final int[] c, final Matrix X) {
         for (int i = 0; i < r.length; i++) {
             for (int j = 0; j < c.length; j++) {
                 this.A[r[i]][c[j]] = X.get(i, j);
@@ -1281,7 +1340,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Solve A*X = B
+     * Solve A*X = B.
      *
      * @param B
      *            right hand side
@@ -1294,7 +1353,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Solve X*A = B, which is also A'*X' = B'
+     * Solve X*A = B, which is also A'*X' = B'.
      *
      * @param B
      *            right hand side
@@ -1307,7 +1366,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Singular Value Decomposition
+     * Singular Value Decomposition.
      *
      * @return SingularValueDecomposition
      * @see SingularValueDecomposition
@@ -1334,7 +1393,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Linear algebraic matrix multiplication, A * B
+     * Linear algebraic matrix multiplication, A * B.
      *
      * @param B
      *            another matrix
@@ -1361,7 +1420,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Multiply a matrix by a scalar in place, A = s*A
+     * Multiply a matrix by a scalar in place, A = s*A.
      *
      * @param s
      *            scalar
@@ -1375,13 +1434,14 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Returns a human-readable representation of this Matrix, with each value in a row separated by tabulator
-     * @return String representation 
+     * Returns a human-readable representation of this Matrix,
+     * with each value in a row separated by tabulator.
+     * @return String representation
      */
     @Override
     public String toString() {
         final StringBuffer st = new StringBuffer();
-        for (final double row[] : this.A) {
+        for (final double[] row : this.A) {
             for (final double d : row) {
                 st.append(d);
                 st.append(" ");
@@ -1407,7 +1467,7 @@ public class Matrix implements Cloneable, Serializable {
 
     /**
      * Applies the given operator to all elements, returning a new Matrix.
-     * 
+     *
      * @param operator
      *            Operator to be applied to this Matrix and B
      * @return new Matrix with the result
@@ -1427,7 +1487,7 @@ public class Matrix implements Cloneable, Serializable {
 
     /**
      * Applies the given operator to all elements, modifying this Matrix.
-     * 
+     *
      * @param operator
      *            Operator to be applied
      * @throws NullPointerException
@@ -1444,7 +1504,7 @@ public class Matrix implements Cloneable, Serializable {
 
     /**
      * Applies the given operator to all elements, returning a new Matrix.
-     * 
+     *
      * @param B
      *            another Matrix
      * @param operator
@@ -1466,7 +1526,7 @@ public class Matrix implements Cloneable, Serializable {
 
     /**
      * Applies the given operator to all elements, modifying this Matrix.
-     * 
+     *
      * @param B
      *            another Matrix
      * @param operator
@@ -1512,7 +1572,7 @@ public class Matrix implements Cloneable, Serializable {
     }
 
     /**
-     * Unary minus
+     * Unary minus.
      *
      * @return new Matrix -A
      */

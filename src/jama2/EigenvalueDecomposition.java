@@ -79,7 +79,7 @@ public class EigenvalueDecomposition implements Serializable {
     private double[] ort;
 
     /**
-     * 
+     * Real and imaginary result of a complex division.
      */
     private transient double cdivr, cdivi;
 
@@ -87,10 +87,14 @@ public class EigenvalueDecomposition implements Serializable {
      * Check for symmetry, then construct the eigenvalue decomposition Structure
      * to access D and V.
      * 
+     * <p>This is a package-private constructor.
+     * Use {@link Matrix#eig()} to create a cholesky decomposition of a given matrix.</p>
+     * 
      * @param Arg
      *            Square matrix
+     * @see Matrix#eig()
      */
-    public EigenvalueDecomposition(final Matrix Arg) {
+    EigenvalueDecomposition(final Matrix Arg) {
         final double[][] A = Arg.getArray();
         this.n = Arg.getColumnDimension();
         this.V = new double[this.n][this.n];

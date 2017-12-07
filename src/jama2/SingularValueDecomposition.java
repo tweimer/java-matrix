@@ -25,7 +25,7 @@ import static java.lang.Math.sqrt;
  * fail. The matrix condition number and the effective numerical rank can be
  * computed from this decomposition.
  * </P>
- * 
+ *
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
@@ -41,7 +41,7 @@ public class SingularValueDecomposition implements Serializable {
 
     /**
      * Arrays for internal storage of U and V.
-     * 
+     *
      * @serial internal storage of U.
      * @serial internal storage of V.
      */
@@ -49,27 +49,30 @@ public class SingularValueDecomposition implements Serializable {
 
     /**
      * Array for internal storage of singular values.
-     * 
+     *
      * @serial internal storage of singular values.
      */
     private final double[] s;
 
     /**
      * Row and column dimensions.
-     * 
+     *
      * @serial row dimension.
      * @serial column dimension.
      */
     private final int m, n;
 
     /**
-     * Construct the singular value decomposition Structure to access U, S and
-     * V.
+     * Construct the singular value decomposition Structure to access U, S and V.
      * 
+     * <p>This is a package-private constructor.
+     * Use {@link Matrix#svd()} to create a cholesky decomposition of a given matrix.</p>
+     *
      * @param Arg
      *            Rectangular matrix
+     * @see Matrix#svd()
      */
-    public SingularValueDecomposition(final Matrix Arg) {
+    SingularValueDecomposition(final Matrix Arg) {
         // Derived from LINPACK code.
         // Initialize.
         final double[][] A = Arg.getArrayCopy();
@@ -94,7 +97,8 @@ public class SingularValueDecomposition implements Serializable {
 
         // Reduce A to bidiagonal form, storing the diagonal elements
         // in s and the super-diagonal elements in e.
-        final int nct = min(this.m - 1, this.n), nrt = max(0, min(this.n - 2, this.m));
+        final int nct = min(this.m - 1, this.n),
+                nrt = max(0, min(this.n - 2, this.m));
         for (int k = 0; k < max(nct, nrt); k++) {
             if (k < nct) {
                 // Compute 2-norm of k-th column without under/overflow.
@@ -384,12 +388,15 @@ public class SingularValueDecomposition implements Serializable {
             // Perform one qr step.
             case 3: {
                 final double scale = max(
-                        max(max(max(abs(this.s[p - 1]), abs(this.s[p - 2])), abs(e[p - 2])), abs(this.s[k])),
-                        abs(e[k]));
+                        max(max(max(abs(this.s[p - 1]),
+                                abs(this.s[p - 2])), abs(e[p - 2])), abs(this.s[k])),
+                                    abs(e[k]));
                 final double sp = this.s[p - 1] / scale;
-                final double spm1 = this.s[p - 2] / scale, epm1 = e[p - 2] / scale;
+                final double spm1 = this.s[p - 2] / scale,
+                        epm1 = e[p - 2] / scale;
                 final double sk = this.s[k] / scale, ek = e[k] / scale;
-                final double b = (((spm1 + sp) * (spm1 - sp)) + (epm1 * epm1)) / 2.0, c = (sp * epm1) * (sp * epm1);
+                final double b = (((spm1 + sp) * (spm1 - sp)) + (epm1 * epm1)) / 2.0,
+                        c = (sp * epm1) * (sp * epm1);
 
                 // Calculate the shift.
                 double shift;
@@ -494,8 +501,8 @@ public class SingularValueDecomposition implements Serializable {
     }
 
     /**
-     * Two norm condition number
-     * 
+     * Two norm condition number.
+     *
      * @return max(S)/min(S)
      */
     public double cond() {
@@ -503,8 +510,8 @@ public class SingularValueDecomposition implements Serializable {
     }
 
     /**
-     * Return the diagonal matrix of singular values
-     * 
+     * Return the diagonal matrix of singular values.
+     *
      * @return S
      */
     public Matrix getS() {
@@ -517,8 +524,8 @@ public class SingularValueDecomposition implements Serializable {
     }
 
     /**
-     * Return the one-dimensional array of singular values
-     * 
+     * Return the one-dimensional array of singular values.
+     *
      * @return diagonal of S.
      */
     public double[] getSingularValues() {
@@ -526,8 +533,8 @@ public class SingularValueDecomposition implements Serializable {
     }
 
     /**
-     * Return the left singular vectors
-     * 
+     * Return the left singular vectors.
+     *
      * @return U
      */
     public Matrix getU() {
@@ -535,8 +542,8 @@ public class SingularValueDecomposition implements Serializable {
     }
 
     /**
-     * Return the right singular vectors
-     * 
+     * Return the right singular vectors.
+     *
      * @return V
      */
     public Matrix getV() {
@@ -544,8 +551,8 @@ public class SingularValueDecomposition implements Serializable {
     }
 
     /**
-     * Two norm
-     * 
+     * Two norm.
+     *
      * @return max(S)
      */
     public double norm2() {
@@ -553,8 +560,8 @@ public class SingularValueDecomposition implements Serializable {
     }
 
     /**
-     * Effective numerical matrix rank
-     * 
+     * Effective numerical matrix rank.
+     *
      * @return Number of nonnegligible singular values.
      */
     public int rank() {

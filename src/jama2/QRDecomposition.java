@@ -22,20 +22,20 @@ import java.io.Serializable;
  */
 public class QRDecomposition implements Serializable {
     /**
-     * For the Serializeable interface
+     * For the Serializable interface.
      */
     private static final long serialVersionUID = 1;
 
     /**
      * Array for internal storage of decomposition.
-     * 
+     *
      * @serial internal array storage.
      */
     private final double[][] QR;
 
     /**
      * Row and column dimensions.
-     * 
+     *
      * @serial column dimension.
      * @serial row dimension.
      */
@@ -43,7 +43,7 @@ public class QRDecomposition implements Serializable {
 
     /**
      * Array for internal storage of diagonal of R.
-     * 
+     *
      * @serial diagonal of R.
      */
     private final double[] Rdiag;
@@ -51,11 +51,15 @@ public class QRDecomposition implements Serializable {
     /**
      * QR Decomposition, computed by Householder reflections. Structure to
      * access R and the Householder vectors and compute Q.
+     *
+     * <p>This is a package-private constructor.
+     * Use {@link Matrix#qr()} to create a cholesky decomposition of a given matrix.</p>
      * 
      * @param A
      *            Rectangular matrix
+     *@see Matrix#qr()
      */
-    public QRDecomposition(final Matrix A) {
+    QRDecomposition(final Matrix A) {
         // Initialize.
         this.QR = A.getArrayCopy();
         this.m = A.getRowDimension();
@@ -98,7 +102,7 @@ public class QRDecomposition implements Serializable {
 
     /**
      * Return the Householder vectors
-     * 
+     *
      * @return Lower trapezoidal matrix whose columns define the reflections
      */
     public Matrix getH() {
@@ -114,7 +118,7 @@ public class QRDecomposition implements Serializable {
 
     /**
      * Generate and return the (economy-sized) orthogonal factor
-     * 
+     *
      * @return Q
      */
     public Matrix getQ() {
@@ -143,10 +147,9 @@ public class QRDecomposition implements Serializable {
 
     /**
      * Return the upper triangular factor
-     * 
+     *
      * @return R
      */
-
     public Matrix getR() {
         final Matrix X = new Matrix(this.n);
         final double[][] R = X.getArray();
@@ -173,8 +176,8 @@ public class QRDecomposition implements Serializable {
     }
 
     /**
-     * Least squares solution of A*X = B
-     * 
+     * Least squares solution of A*X = B.
+     *
      * @param B
      *            A Matrix with as many rows as A and any number of columns.
      * @return Returns null if row dimensions don't agree or matris is rang
@@ -184,12 +187,8 @@ public class QRDecomposition implements Serializable {
     public Matrix solve(final Matrix B) {
         if (B.getRowDimension() != this.m) {
             return null;
-            // throw new IllegalArgumentException("Matrix row dimensions must
-            // agree."); //$NON-NLS-1$
         } else if (!this.isFullRank()) {
             return null;
-            // throw new RuntimeException("Matrix is rank deficient.");
-            // //$NON-NLS-1$
         }
 
         // Copy right hand side

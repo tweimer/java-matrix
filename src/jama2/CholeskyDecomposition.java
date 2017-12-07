@@ -13,7 +13,7 @@ import java.io.Serializable;
  * a partial decomposition and sets an internal flag that may be queried by the
  * isSPD() method.
  * </P>
- * 
+ *
  * @author The MathWorks, Inc. and the National Institute of Standards and
  *         Technology.
  * @version 2.0
@@ -21,27 +21,27 @@ import java.io.Serializable;
  */
 public class CholeskyDecomposition implements Serializable {
     /**
-     * For the Serializeable interface
+     * For the Serializable interface.
      */
     private static final long serialVersionUID = 1;
 
     /**
      * Array for internal storage of decomposition.
-     * 
+     *
      * @serial internal array storage.
      */
     private final double[][] L;
 
     /**
      * Row and column dimension (square matrix).
-     * 
+     *
      * @serial matrix dimension.
      */
     private final int n;
 
     /**
      * Symmetric and positive definite flag.
-     * 
+     *
      * @serial is symmetric and positive definite flag.
      */
     private final boolean isspd;
@@ -125,11 +125,15 @@ public class CholeskyDecomposition implements Serializable {
     /**
      * Cholesky algorithm for symmetric and positive definite matrix. Structure
      * to access L and isspd flag.
-     * 
+     *
+     * <p>This is a package-private constructor.
+     * Use {@link Matrix#chol()} to create a cholesky decomposition of a given matrix.</p>
+     *
      * @param Arg
      *            Square, symmetric matrix.
+     * @see Matrix#chol()
      */
-    public CholeskyDecomposition(final Matrix Arg) {
+    CholeskyDecomposition(final Matrix Arg) {
         // Initialize.
         final double[][] A = Arg.getArray();
         this.n = Arg.getRowDimension();

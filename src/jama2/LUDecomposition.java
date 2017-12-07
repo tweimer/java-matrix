@@ -136,10 +136,14 @@ public class LUDecomposition implements Serializable {
     /**
      * LU Decomposition Structure to access L, U and piv.
      * 
+     * <p>This is a package-private constructor.
+     * Use {@link Matrix#qr()} to create a cholesky decomposition of a given matrix.</p>
+     * 
      * @param A
      *            Rectangular matrix
+     * @see Matrix#lu()
      */
-    public LUDecomposition(final Matrix A) {
+    LUDecomposition(final Matrix A) {
         // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
         this.LU = A.getArrayCopy();
         this.m = A.getRowDimension();
