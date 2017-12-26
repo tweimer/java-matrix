@@ -52,163 +52,144 @@ public class LUDecomposition implements Serializable {
      */
     private final int piv[];
 
-    /*
-     * ------------------------ Temporary, experimental code.
-     * ------------------------
-     */
 
-    // /**
-    // * LU Decomposition, computed by Gaussian elimination.
-    // * <P>
-    // * This constructor computes L and U with the "daxpy"-based elimination
-    // * algorithm used in LINPACK and MATLAB. In Java, we suspect the
-    // * dot-product, Crout algorithm will be faster. We have temporarily
-    // included
-    // * this constructor until timing experiments confirm this suspicion.
-    // * </P>
-    // * Structure to access L, U and piv.
-    // *
-    // * @param A
-    // * Rectangular matrix
-    // * @param linpackflag
-    // * Use Gaussian elimination. Actual value ignored.
-    // */
-    // public LUDecomposition(final Matrix A, final int linpackflag)
-    // {
-    // // Initialize.
-    // this.LU = A.getArrayCopy();
-    // this.m = A.getRowDimension();
-    // this.n = A.getColumnDimension();
-    // this.piv = new int[this.m];
-    // for (int i = 0; i < this.m; i++)
-    // {
-    // this.piv[i] = i;
-    // }
-    // // Main loop.
-    // for (int k = 0; k < this.n; k++)
-    // {
-    // // Find pivot.
-    // int p = k;
-    // for (int i = k + 1; i < this.m; i++)
-    // {
-    // if (Math.abs(this.LU[i][k]) > Math.abs(this.LU[p][k]))
-    // {
-    // p = i;
-    // }
-    // }
-    // // Exchange if necessary.
-    // if (p != k)
-    // {
-    // for (int j = 0; j < this.n; j++)
-    // {
-    // final double t = this.LU[p][j];
-    // this.LU[p][j] = this.LU[k][j];
-    // this.LU[k][j] = t;
-    // }
-    // final int t = this.piv[p];
-    // this.piv[p] = this.piv[k];
-    // this.piv[k] = t;
-    // this.pivsign = -this.pivsign;
-    // }
-    // // Compute multipliers and eliminate k-th column.
-    // if (this.LU[k][k] != 0.0)
-    // {
-    // for (int i = k + 1; i < this.m; i++)
-    // {
-    // this.LU[i][k] /= this.LU[k][k];
-    // for (int j = k + 1; j < this.n; j++)
-    // {
-    // this.LU[i][j] -= this.LU[i][k] * this.LU[k][j];
-    // }
-    // }
-    // }
-    // }
-    // }
-
-    /*
-     * ------------------------ End of temporary code. ------------------------
+    /**
+     * LU Decomposition, computed by Gaussian elimination.
+     * <P>
+     * This constructor computes L and U with the "daxpy"-based
+     * elimination algorithm used in LINPACK and MATLAB. In
+     * Java, we suspect the dot-product, Crout algorithm will be
+     * faster. We have temporarily included this constructor
+     * until timing experiments confirm this suspicion.
+     * </P>
+     * Structure to access L, U and piv.
+     *
+     * @param A
+     *            Rectangular matrix
+     * @param linpackflag
+     *            If true, use Gaussian elimination,
+     *            otherwise Crout algorithm.
      */
+    LUDecomposition(final Matrix A, final boolean linpackflag) {
+        // Initialize.
+        this.LU = A.getArrayCopy();
+        this.m = A.getRowDimension();
+        this.n = A.getColumnDimension();
+        
+        this.piv = new int[this.m];
+        for (int i = 1; i < this.m; i++) {
+            this.piv[i] = i;
+        }
+        
+        int pivsign = 1;
+        if (linpackflag) {
+            // Main loop.
+            for (int k = 0; k < this.n; k++) {
+                // Find pivot.
+                int p = k;
+                for (int i = k + 1; i < this.m; i++) {
+                    if (Math.abs(this.LU[i][k]) > Math.abs(this.LU[p][k])) {
+                        p = i;
+                    }
+                }
+                
+                // Exchange if necessary.
+                if (p != k) {
+                    for (int j = 0; j < this.n; j++) {
+                        final double t = this.LU[p][j];
+                        this.LU[p][j] = this.LU[k][j];
+                        this.LU[k][j] = t;
+                    }
+                    
+                    // Swap piv[p] and piv[k]
+                    final int t = this.piv[p];
+                    this.piv[p] = this.piv[k];
+                    this.piv[k] = t;
+                    
+                    // alternate pivsign
+                    pivsign = -pivsign;
+                }
+                
+                // Compute multipliers and eliminate k-th column.
+                if (this.LU[k][k] != 0D) {
+                    for (int i = k + 1; i < this.m; i++) {
+                        this.LU[i][k] /= this.LU[k][k];
+                        for (int j = k + 1; j < this.n; j++) {
+                            this.LU[i][j] -= this.LU[i][k] * this.LU[k][j];
+                        }
+                    }
+                }
+            }
+        } else {
+            // Outer loop.
+            for (int j = 0; j < this.n; j++) {
+                final double[] LUcolj = new double[this.m];
 
-    /*
-     * ------------------------ Public Methods ------------------------
-     */
+                // Make a copy of the j-th column to localize references.
+                for (int i = 0; i < this.m; i++) {
+                    LUcolj[i] = this.LU[i][j];
+                }
+
+                // Apply previous transformations.
+                for (int i = 0; i < this.m; i++) {
+                    final double[] LUrowi = this.LU[i];
+
+                    // Most of the time is spent in the following dot product.
+                    final int kmax = Math.min(i, j);
+                    double s = 0D;
+                    for (int k = 0; k < kmax; k++) {
+                        s += LUrowi[k] * LUcolj[k];
+                    }
+                    LUrowi[j] = LUcolj[i] -= s;
+                }
+
+                // Find pivot and exchange if necessary.
+                int p = j;
+                for (int i = j + 1; i < this.m; i++) {
+                    if (Math.abs(LUcolj[i]) > Math.abs(LUcolj[p])) {
+                        p = i;
+                    }
+                }
+
+                if (p != j) {
+                    // Swap this.LU[p][k] and this.LU[j][k]
+                    final double row_p[] = this.LU[p];
+                    this.LU[p] = this.LU[j];
+                    this.LU[j] = row_p;
+
+                    // swap piv[p] and piv[j]
+                    final int k = this.piv[p];
+                    this.piv[p] = this.piv[j];
+                    this.piv[j] = k;
+
+                    // alternate pivsign
+                    pivsign = -pivsign;
+                }
+
+                // Compute multipliers.
+                if ((j < this.m) && (this.LU[j][j] != 0D)) {
+                    for (int i = j + 1; i < this.m; i++) {
+                        this.LU[i][j] /= this.LU[j][j];
+                    }
+                }
+            }
+        }
+        this.pivsign = pivsign;
+    }
+
 
     /**
      * LU Decomposition Structure to access L, U and piv.
      * 
      * <p>This is a package-private constructor.
-     * Use {@link Matrix#qr()} to create a cholesky decomposition of a given matrix.</p>
+     * Use {@link Matrix#lu()} to create a cholesky decomposition of a given matrix.</p>
      * 
      * @param A
      *            Rectangular matrix
      * @see Matrix#lu()
      */
     LUDecomposition(final Matrix A) {
-        // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
-        this.LU = A.getArrayCopy();
-        this.m = A.getRowDimension();
-        this.n = A.getColumnDimension();
-
-        this.piv = new int[this.m];
-        for (int i = 0; i < this.piv.length; i++) {
-            this.piv[i] = i;
-        }
-
-        int pivsign = 1;
-
-        // Outer loop.
-        for (int j = 0; j < this.n; j++) {
-            final double[] LUcolj = new double[this.m];
-
-            // Make a copy of the j-th column to localize references.
-            for (int i = 0; i < this.m; i++) {
-                LUcolj[i] = this.LU[i][j];
-            }
-
-            // Apply previous transformations.
-            for (int i = 0; i < this.m; i++) {
-                final double[] LUrowi = this.LU[i];
-
-                // Most of the time is spent in the following dot product.
-                final int kmax = Math.min(i, j);
-                double s = 0D;
-                for (int k = 0; k < kmax; k++) {
-                    s += LUrowi[k] * LUcolj[k];
-                }
-                LUrowi[j] = LUcolj[i] -= s;
-            }
-
-            // Find pivot and exchange if necessary.
-            int p = j;
-            for (int i = j + 1; i < this.m; i++) {
-                if (Math.abs(LUcolj[i]) > Math.abs(LUcolj[p])) {
-                    p = i;
-                }
-            }
-
-            if (p != j) {
-                // Swap this.LU[p][k] and this.LU[j][k]
-                final double row_p[] = this.LU[p];
-                this.LU[p] = this.LU[j];
-                this.LU[j] = row_p;
-
-                // swap piv[p] and piv[j]
-                final int k = this.piv[p];
-                this.piv[p] = this.piv[j];
-                this.piv[j] = k;
-
-                // alternate pivsign
-                pivsign = -pivsign;
-            }
-
-            // Compute multipliers.
-            if ((j < this.m) && (this.LU[j][j] != 0D)) {
-                for (int i = j + 1; i < this.m; i++) {
-                    this.LU[i][j] /= this.LU[j][j];
-                }
-            }
-        }
-        this.pivsign = pivsign;
+        this(A, false);
     }
 
     /**
@@ -255,8 +236,7 @@ public class LUDecomposition implements Serializable {
      * @return L lower triangular factor
      */
     public Matrix getL() {
-        final Matrix X = new Matrix(this.m, this.n);
-        final double L[][] = X.getArray();
+        final double L[][] = new double[this.m][this.n];
         for (int i = 0; i < this.m; i++) {
             for (int j = 0; j < i; j++) {
                 L[i][j] = this.LU[i][j];
@@ -268,7 +248,7 @@ public class LUDecomposition implements Serializable {
                 L[i][j] = 0;
             }
         }
-        return X;
+        return new Matrix(this.m, this.n, L);
     }
 
     /**
@@ -286,8 +266,7 @@ public class LUDecomposition implements Serializable {
      * @return U upper triangular factor
      */
     public Matrix getU() {
-        final Matrix X = new Matrix(this.n);
-        final double[][] U = X.getArray();
+        final double[][] U = new double[this.n][this.n];
         for (int i = 0; i < this.n; i++) {
             for (int j = 0; j < i; j++) {
                 U[i][j] = 0;
@@ -297,7 +276,7 @@ public class LUDecomposition implements Serializable {
                 U[i][j] = this.LU[i][j];
             }
         }
-        return X;
+        return new Matrix(this.n, U);
     }
 
     /**
