@@ -538,7 +538,7 @@ public class SingularValueDecomposition implements Serializable {
      * @return U
      */
     public Matrix getU() {
-        return new Matrix(this.m, min(this.m + 1, this.n), this.U);
+        return new Matrix(this.m, min(this.m, this.n), this.U);
     }
 
     /**
