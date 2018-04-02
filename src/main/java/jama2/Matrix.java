@@ -13,7 +13,6 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.Vector;
 import java.util.function.DoubleBinaryOperator;
-import java.util.function.DoubleFunction;
 import java.util.function.DoublePredicate;
 import java.util.function.DoubleUnaryOperator;
 
@@ -91,9 +90,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *                All rows must have the same length
      */
     public static Matrix constructWithCopy(final double[][] A) {
-        final int m = A.length;
-        final int n = A[0].length;
-        final double[][] C = new double[m][];
+        final var m = A.length;
+        final var n = A[0].length;
+        final var C = new double[m][];
         for (int i = 0; i < C.length; i++) {
             if (A[i].length != n) {
                 throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
@@ -210,7 +209,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *             if any IOException occurs while reading
      */
     public static Matrix read(final BufferedReader input) throws IOException {
-        final StreamTokenizer tokenizer = new StreamTokenizer(input);
+        final var tokenizer = new StreamTokenizer(input);
 
         // Although StreamTokenizer will parse numbers, it doesn't recognize
         // scientific notation (E or D); however, Double.valueOf does.
@@ -231,23 +230,23 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
             throw new IOException("Unexpected EOF on matrix read."); //$NON-NLS-1$
         }
 
-        final Vector<Double> vD = new Vector<>();
+        final var vD = new Vector<Double>();
         do {
             // Read & store 1st row.
             vD.addElement(Double.valueOf(tokenizer.sval));
         } while (tokenizer.nextToken() == StreamTokenizer.TT_WORD);
 
         // Now we've got the number of columns!
-        final int n = vD.size();
-        double[] row = new double[n];
+        final var n = vD.size();
+        var row = new double[n];
         int j = 0;
-        for (final Double d : vD) {
+        for (final var d : vD) {
             // extract the elements of the 1st row.
             row[j++] = d.doubleValue();
         }
 
         // Start storing rows instead of columns.
-        final Vector<double[]> v = new Vector<>();
+        final var v = new Vector<double[]>();
         v.addElement(row);
         while (tokenizer.nextToken() == StreamTokenizer.TT_WORD) {
             // While non-empty lines
@@ -265,8 +264,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
         }
 
         // Now we've got the number of rows.
-        final int m = v.size();
-        final double[][] A = new double[m][];
+        final var m = v.size();
+        final var A = new double[m][];
 
         // copy the rows out of the vector
         v.copyInto(A);
@@ -305,8 +304,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
             throw new IllegalArgumentException("Array length must be a multiple of m."); //$NON-NLS-1$
         } else {
             this.A = new double[this.m = m][this.n];
-            for (int i = 0; i < this.A.length; i++) {
-                for (int j = 0; j < this.A[i].length; j++) {
+            for (var i = 0; i < this.A.length; i++) {
+                for (var j = 0; j < this.A[i].length; j++) {
                     this.A[i][j] = vals[i + j * m];
                 }
             }
@@ -330,7 +329,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
         this(A.length, A[0].length, A);
 
         // check if each row has the same length
-        for (double[] r : this.A) {
+        for (var r : this.A) {
             if (r.length != this.n) {
                 throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
             }
@@ -430,8 +429,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
     */
     public Matrix(final int m, final int n, IMatrix matrix) {
         this(n, m);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] = matrix.get(i, j);
             }
         }
@@ -452,8 +451,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
      public Matrix(final int m, final int n, IMatrix matrix, DoubleUnaryOperator f) {
          this(n, m);
-         for (int i = 0; i < this.A.length; i++) {
-             for (int j = 0; j < this.A[i].length; j++) {
+         for (var i = 0; i < this.A.length; i++) {
+             for (var j = 0; j < this.A[i].length; j++) {
                  this.A[i][j] = f.applyAsDouble(matrix.get(i, j));
              }
          }
@@ -471,8 +470,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @see #anyMatch(DoublePredicate)
      */
     public boolean allMatch(final DoublePredicate predicate) {
-        for (final double[] row : this.A) {
-            for (final double d : row) {
+        for (final var row : this.A) {
+            for (final var d : row) {
                 if (!predicate.test(d)) {
                     return false;
                 }
@@ -493,8 +492,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @see #allMatch(DoublePredicate)
      */
     public boolean anyMatch(final DoublePredicate predicate) {
-        for (final double[] row : this.A) {
-            for (final double d : row) {
+        for (final var row : this.A) {
+            for (final var d : row) {
                 if (predicate.test(d)) {
                     return true;
                 }
@@ -512,8 +511,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public Matrix arrayLeftDivide(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final Matrix M = new Matrix(this.m, this.n);
-        for (int i = 0; i < this.A.length; i++) {
+        final var M = new Matrix(this.m, this.n);
+        for (var i = 0; i < this.A.length; i++) {
             for (int j = 0; j < this.A[i].length; j++) {
                 M.A[i][j] = B.A[i][j] / this.A[i][j];
             }
@@ -529,8 +528,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public void arrayLeftDivideEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] = B.A[i][j] / this.A[i][j];
             }
         }
@@ -545,7 +544,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public Matrix arrayRightDivide(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final Matrix M = new Matrix(this.m, this.n);
+        final var M = new Matrix(this.m, this.n);
         for (int i = 0; i < this.A.length; i++) {
             for (int j = 0; j < this.A[i].length; j++) {
                 M.A[i][j] = this.A[i][j] / B.A[i][j];
@@ -562,8 +561,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public void arrayRightDivideEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] /= B.A[i][j];
             }
         }
@@ -579,9 +578,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public Matrix arrayTimes(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final Matrix M = new Matrix(this.m, this.n);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        final var M = new Matrix(this.m, this.n);
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 M.A[i][j] = this.A[i][j] * B.A[i][j];
             }
         }
@@ -597,8 +596,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public void arrayTimesEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] *= B.A[i][j];
             }
         }
@@ -747,8 +746,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return Two-dimensional array copy of matrix elements.
      */
     public double[][] getArrayCopy() {
-        final double[][] C = new double[this.m][];
-        for (int i = 0; i < C.length; i++) {
+        final var C = new double[this.m][];
+        for (var i = 0; i < C.length; i++) {
             C[i] = Arrays.copyOf(this.A[i], this.n);
         }
         return C;
@@ -784,10 +783,10 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return Matrix elements packed in a one-dimensional array by rows.
      */
     public double[] getRowPackedCopy() {
-        final double[] vals = new double[this.m * this.n];
-        int i = 0;
-        for (double[] row : this.A) {
-            for (double d : row) {
+        final var vals = new double[this.m * this.n];
+        var i = 0;
+        for (var row : this.A) {
+            for (var d : row) {
                 vals[i++] = d;
             }
         }
@@ -808,10 +807,11 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *             Submatrix indices
      */
     public Matrix getMatrix(final int r0, final int r1, final int[] c) {
-        final int m1 = r1 - r0 + 1, n1 = c.length;
-        final Matrix M = new Matrix(m1, n1);
-        for (int i = r0; i <= r1; i++) {
-            for (int j = 0; j < n1; j++) {
+        final var m1 = r1 - r0 + 1;
+        final var n1 = c.length;
+        final var M = new Matrix(m1, n1);
+        for (var i = r0; i <= r1; i++) {
+            for (var j = 0; j < n1; j++) {
                 M.A[i - r0][j] = this.A[i][c[j]];
             }
         }
@@ -834,10 +834,11 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *                Submatrix indices
      */
     public Matrix getMatrix(final int r0, final int r1, final int c0, final int c1) {
-        final int m1 = r1 - r0 + 1, n1 = c1 - c0 + 1;
-        final Matrix M = new Matrix(m1, n1);
-        for (int i = r0; i <= r1; i++) {
-            for (int j = c0; j <= c1; j++) {
+        final var m1 = r1 - r0 + 1;
+        final var n1 = c1 - c0 + 1;
+        final var M = new Matrix(m1, n1);
+        for (var i = r0; i <= r1; i++) {
+            for (var j = c0; j <= c1; j++) {
                 M.A[i - r0][j - c0] = this.A[i][j];
             }
         }
@@ -880,10 +881,11 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *                Submatrix indices
      */
     public Matrix getMatrix(final int r[], final int c[]) {
-        final int m1 = r.length, n1 = c.length;
-        final Matrix M = new Matrix(m1, n1);
-        for (int i = 0; i < m1; i++) {
-            for (int j = 0; j < n1; j++) {
+        final var m1 = r.length;
+        final var n1 = c.length;
+        final var M = new Matrix(m1, n1);
+        for (var i = 0; i < m1; i++) {
+            for (var j = 0; j < n1; j++) {
                 M.A[i][j] = this.A[r[i]][c[j]];
             }
         }
@@ -912,8 +914,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * Makes the identity matrix.
      */
     public void identity() {
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] = i == j ? 1D : 0D;
             }
         }
@@ -926,7 +928,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @see #solve
      */
     public Matrix inverse() {
-        final Matrix I = new Matrix(this.m);
+        final var I = new Matrix(this.m);
         I.identity();
         return this.solve(I);
     }
@@ -960,9 +962,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public Matrix minus(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final Matrix M = new Matrix(this.m, this.n);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        final var M = new Matrix(this.m, this.n);
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 M.A[i][j] = this.A[i][j] - B.A[i][j];
             }
         }
@@ -978,8 +980,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public void minusEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] -= B.A[i][j];
             }
         }
@@ -991,10 +993,10 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return maximum column sum.
      */
     public double norm1() {
-        double f = 0;
-        for (int j = 0; j < this.n; j++) {
-            double s = 0D;
-            for (int i = 0; i < this.m; i++) {
+        var f = 0D;
+        for (var j = 0; j < this.n; j++) {
+            var s = 0D;
+            for (var i = 0; i < this.m; i++) {
                 s += abs(this.A[i][j]);
             }
             if (f < s) {
@@ -1034,10 +1036,10 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return maximum row sum.
      */
     public double normInf() {
-        double f = 0;
-        for (final double[] row : this.A) {
-            double s = 0;
-            for (final double d : row) {
+        var f = 0D;
+        for (final var row : this.A) {
+            var s = 0D;
+            for (final var d : row) {
                 s += abs(d);
             }
             if (f < s) {
@@ -1057,9 +1059,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public Matrix plus(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final Matrix M = new Matrix(this.m, this.n);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        final var M = new Matrix(this.m, this.n);
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 M.A[i][j] = this.A[i][j] + B.A[i][j];
             }
         }
@@ -1075,8 +1077,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public void plusEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] += B.A[i][j];
             }
         }
@@ -1117,13 +1119,13 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
         // start on new line.
         output.println();
 
-        for (final double[] row : this.A) {
-            for (final double d : row) {
+        for (final var row : this.A) {
+            for (final var d : row) {
                 // format the number
-                final String s = format.format(d);
+                final var s = format.format(d);
                 // At _least_ 1 space
-                final int padding = width > s.length() ? width - s.length() : 1;
-                for (int k = 0; k < padding; k++) {
+                final var padding = width > s.length() ? width - s.length() : 1;
+                for (var k = 0; k < padding; k++) {
                     output.print(' ');
                 }
                 output.print(s);
@@ -1147,13 +1149,11 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *            Number of digits after the decimal.
      */
     public void print(final PrintWriter output, final int w, final int d) {
-        // DecimalFormat is a little disappointing coming from Fortran or C's
-        // printf.
-        // Since it doesn't pad on the left, the elements will come out
-        // different
+        // DecimalFormat is a little disappointing coming from Fortran or C's printf.
+        // Since it doesn't pad on the left, the elements will come out different
         // widths. Consequently, we'll pass the desired column width in as an
         // argument and do the extra padding ourselves.
-        final DecimalFormat format = new DecimalFormat();
+        final var format = new DecimalFormat();
         format.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
         format.setMinimumIntegerDigits(1);
         format.setMaximumFractionDigits(d);
@@ -1189,9 +1189,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * Creates a random Matrix.
      */
     public void random() {
-        final Random rnd = new Random();
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        final var rnd = new Random();
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] = rnd.nextDouble();
             }
         }
@@ -1201,9 +1201,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * Creates a random Matrix.
      */
     public void randomInt() {
-        final Random rnd = new Random();
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        final var rnd = new Random();
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] = rnd.nextInt();
             }
         }
@@ -1226,8 +1226,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *            scalar
      */
     public void set(final double s) {
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] = s;
             }
         }
@@ -1274,8 +1274,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *            A(r0:r1,c0:c1)
      */
     public void setMatrix(final int r0, final int r1, final int c0, final int c1, final Matrix X) {
-        for (int i = r0; i <= r1; i++) {
-            for (int j = c0; j <= c1; j++) {
+        for (var i = r0; i <= r1; i++) {
+            for (var j = c0; j <= c1; j++) {
                 this.A[i][j] = X.A[i - r0][j - c0];
             }
         }
@@ -1294,8 +1294,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *            A(r0:r1,c(:))
      */
     public void setMatrix(final int r0, final int r1, final int[] c, final Matrix X) {
-        for (int i = r0; i <= r1; i++) {
-            for (int j = 0; j < c.length; j++) {
+        for (var i = r0; i <= r1; i++) {
+            for (var j = 0; j < c.length; j++) {
                 this.A[i][c[j]] = X.A[i - r0][j];
             }
         }
@@ -1314,8 +1314,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *            A(r(:),c0:c1)
      */
     public void setMatrix(final int[] r, final int c0, final int c1, final Matrix X) {
-        for (int i = 0; i < r.length; i++) {
-            for (int j = c0; j <= c1; j++) {
+        for (var i = 0; i < r.length; i++) {
+            for (var j = c0; j <= c1; j++) {
                 this.A[r[i]][j] = X.A[i][j - c0];
             }
         }
@@ -1332,8 +1332,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *            A(r(:),c(:))
      */
     public void setMatrix(final int[] r, final int[] c, final Matrix X) {
-        for (int i = 0; i < r.length; i++) {
-            for (int j = 0; j < c.length; j++) {
+        for (var i = 0; i < r.length; i++) {
+            for (var j = 0; j < c.length; j++) {
                 this.A[r[i]][c[j]] = X.get(i, j);
             }
         }
@@ -1349,7 +1349,14 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *         rank deficient).
      */
     public Matrix solve(final Matrix B) {
-        return this.m == this.n ? this.lu().solve(B) : this.qr().solve(B);
+        return this.getSolver().solve(B);
+    }
+
+    /**
+     * @return
+     */
+    private ISolver getSolver() {
+        return this.m == this.n ? this.lu() : this.qr();
     }
 
     /**
@@ -1383,9 +1390,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return new Matrix s*A
      */
     public Matrix times(final double s) {
-        final Matrix M = new Matrix(this.m, this.n);
-        for (int i = 0; i < this.m; i++) {
-            for (int j = 0; j < this.n; j++) {
+        final var M = new Matrix(this.m, this.n);
+        for (var i = 0; i < this.m; i++) {
+            for (var j = 0; j < this.n; j++) {
                 M.A[i][j] = s * this.A[i][j];
             }
         }
@@ -1402,14 +1409,12 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
     public Matrix times(final Matrix B) {
         if (B.m != this.n) {
             return null;
-            // throw new IllegalArgumentException("Matrix inner dimensions must
-            // agree."); //$NON-NLS-1$
         } else {
-            final Matrix X = new Matrix(this.m, B.n);
-            for (int j = 0; j < B.n; j++) {
-                for (int i = 0; i < this.m; i++) {
-                    double s = 0;
-                    for (int k = 0; k < this.n; k++) {
+            final var X = new Matrix(this.m, B.n);
+            for (var j = 0; j < B.n; j++) {
+                for (var i = 0; i < this.m; i++) {
+                    var s = 0D;
+                    for (var k = 0; k < this.n; k++) {
                         s += this.A[i][k] * B.A[k][j];
                     }
                     X.A[i][j] = s;
@@ -1426,8 +1431,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *            scalar
      */
     public void timesEquals(final double s) {
-        for (int i = 0; i < this.m; i++) {
-            for (int j = 0; j < this.n; j++) {
+        for (var i = 0; i < this.m; i++) {
+            for (var j = 0; j < this.n; j++) {
                 this.A[i][j] *= s;
             }
         }
@@ -1440,9 +1445,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     @Override
     public String toString() {
-        final StringBuffer st = new StringBuffer();
-        for (final double[] row : this.A) {
-            for (final double d : row) {
+        final var st = new StringBuffer();
+        for (final var row : this.A) {
+            for (final var d : row) {
                 st.append(d);
                 st.append(" ");
             }
@@ -1457,12 +1462,12 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return sum of the diagonal elements.
      */
     public double trace() {
-        final int dim = this.m < this.n ? this.m : this.n;
-        double t = 0;
-        for (int i = 0; i < dim; i++) {
-            t += this.A[i][i];
+        final var dim = this.m < this.n ? this.m : this.n;
+        var trace = 0D;
+        for (var i = 0; i < dim; i++) {
+            trace += this.A[i][i];
         }
-        return t;
+        return trace;
     }
 
     /**
@@ -1476,9 +1481,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @see #transformEquals(DoubleUnaryOperator)
      */
     public Matrix transform(final DoubleUnaryOperator operator) {
-        final Matrix M = new Matrix(this.m, this.n);
-        for (int i = 0; i < this.m; i++) {
-            for (int j = 0; j < this.n; j++) {
+        final var M = new Matrix(this.m, this.n);
+        for (var i = 0; i < this.m; i++) {
+            for (var j = 0; j < this.n; j++) {
                 M.A[i][j] = operator.applyAsDouble(this.A[i][j]);
             }
         }
@@ -1495,8 +1500,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @see #transform(DoubleUnaryOperator)
      */
     public void transformEquals(final DoubleUnaryOperator operator) {
-        for (int i = 0; i < this.m; i++) {
-            for (int j = 0; j < this.n; j++) {
+        for (var i = 0; i < this.m; i++) {
+            for (var j = 0; j < this.n; j++) {
                 this.A[i][j] = operator.applyAsDouble(this.A[i][j]);
             }
         }
@@ -1515,9 +1520,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @see #transformEquals(Matrix, DoubleBinaryOperator)
      */
     public Matrix transform(final Matrix B, final DoubleBinaryOperator operator) {
-        final Matrix M = new Matrix(this.m, this.n);
-        for (int i = 0; i < this.m; i++) {
-            for (int j = 0; j < this.n; j++) {
+        final var M = new Matrix(this.m, this.n);
+        for (var i = 0; i < this.m; i++) {
+            for (var j = 0; j < this.n; j++) {
                 M.A[i][j] = operator.applyAsDouble(this.A[i][j], B.A[i][j]);
             }
         }
@@ -1536,8 +1541,8 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @see #transform(Matrix, DoubleBinaryOperator)
      */
     public void transformEquals(final Matrix B, final DoubleBinaryOperator operator) {
-        for (int i = 0; i < this.m; i++) {
-            for (int j = 0; j < this.n; j++) {
+        for (var i = 0; i < this.m; i++) {
+            for (var j = 0; j < this.n; j++) {
                 this.A[i][j] = operator.applyAsDouble(this.A[i][j], B.A[i][j]);
             }
         }
@@ -1549,9 +1554,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return new Matrix A'
      */
     public Matrix transpose() {
-        final Matrix M = new Matrix(this.n, this.m);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        final var M = new Matrix(this.n, this.m);
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 M.A[j][i] = this.A[i][j];
             }
         }
@@ -1562,9 +1567,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * Transposes this matrix.
      */
     public void transposeThis() {
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < i; j++) {
-                final double t = this.A[i][j];
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < i; j++) {
+                final var t = this.A[i][j];
                 this.A[i][j] = this.A[j][i];
                 this.A[j][i] = t;
             }
@@ -1577,9 +1582,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return new Matrix -A
      */
     public Matrix uminus() {
-        final Matrix M = new Matrix(this.m, this.n);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
+        final var M = new Matrix(this.m, this.n);
+        for (var i = 0; i < this.A.length; i++) {
+            for (var j = 0; j < this.A[i].length; j++) {
                 M.A[i][j] = -this.A[i][j];
             }
         }

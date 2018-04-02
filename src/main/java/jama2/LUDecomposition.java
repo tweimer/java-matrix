@@ -23,7 +23,7 @@ import java.util.Arrays;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class LUDecomposition implements Serializable {
+public class LUDecomposition implements ISolver, Serializable {
     /**
      * For the Serializeable interface
      */
@@ -77,32 +77,32 @@ public class LUDecomposition implements Serializable {
         this.n = A.getColumnDimension();
         
         this.piv = new int[this.m];
-        for (int i = 1; i < this.m; i++) {
+        for (var i = 1; i < this.m; i++) {
             this.piv[i] = i;
         }
         
-        int pivsign = 1;
+        var pivsign = 1;
         if (linpackflag) {
             // Main loop.
-            for (int k = 0; k < this.n; k++) {
+            for (var k = 0; k < this.n; k++) {
                 // Find pivot.
-                int p = k;
-                for (int i = k + 1; i < this.m; i++) {
+                var p = k;
+                for (var i = k + 1; i < this.m; i++) {
                     if (Math.abs(this.LU[i][k]) > Math.abs(this.LU[p][k])) {
                         p = i;
                     }
                 }
                 
                 // Exchange if necessary.
-                if (p != k) {
-                    for (int j = 0; j < this.n; j++) {
-                        final double t = this.LU[p][j];
+                if (p > k) {
+                    for (var j = 0; j < this.n; j++) {
+                        final var t = this.LU[p][j];
                         this.LU[p][j] = this.LU[k][j];
                         this.LU[k][j] = t;
                     }
                     
                     // Swap piv[p] and piv[k]
-                    final int t = this.piv[p];
+                    final var t = this.piv[p];
                     this.piv[p] = this.piv[k];
                     this.piv[k] = t;
                     
@@ -112,9 +112,9 @@ public class LUDecomposition implements Serializable {
                 
                 // Compute multipliers and eliminate k-th column.
                 if (this.LU[k][k] != 0D) {
-                    for (int i = k + 1; i < this.m; i++) {
+                    for (var i = k + 1; i < this.m; i++) {
                         this.LU[i][k] /= this.LU[k][k];
-                        for (int j = k + 1; j < this.n; j++) {
+                        for (var j = k + 1; j < this.n; j++) {
                             this.LU[i][j] -= this.LU[i][k] * this.LU[k][j];
                         }
                     }
@@ -122,43 +122,43 @@ public class LUDecomposition implements Serializable {
             }
         } else {
             // Outer loop.
-            for (int j = 0; j < this.n; j++) {
-                final double[] LUcolj = new double[this.m];
+            for (var j = 0; j < this.n; j++) {
+                final var LUcolj = new double[this.m];
 
                 // Make a copy of the j-th column to localize references.
-                for (int i = 0; i < this.m; i++) {
+                for (var i = 0; i < this.m; i++) {
                     LUcolj[i] = this.LU[i][j];
                 }
 
                 // Apply previous transformations.
-                for (int i = 0; i < this.m; i++) {
-                    final double[] LUrowi = this.LU[i];
+                for (var i = 0; i < this.m; i++) {
+                    final var LUrowi = this.LU[i];
 
                     // Most of the time is spent in the following dot product.
-                    final int kmax = Math.min(i, j);
-                    double s = 0D;
-                    for (int k = 0; k < kmax; k++) {
+                    final var kmax = Math.min(i, j);
+                    var s = 0D;
+                    for (var k = 0; k < kmax; k++) {
                         s += LUrowi[k] * LUcolj[k];
                     }
                     LUrowi[j] = LUcolj[i] -= s;
                 }
 
                 // Find pivot and exchange if necessary.
-                int p = j;
-                for (int i = j + 1; i < this.m; i++) {
+                var p = j;
+                for (var i = j + 1; i < this.m; i++) {
                     if (Math.abs(LUcolj[i]) > Math.abs(LUcolj[p])) {
                         p = i;
                     }
                 }
 
-                if (p != j) {
+                if (p > j) {
                     // Swap this.LU[p][k] and this.LU[j][k]
-                    final double row_p[] = this.LU[p];
+                    final var row_p = this.LU[p];
                     this.LU[p] = this.LU[j];
                     this.LU[j] = row_p;
 
                     // swap piv[p] and piv[j]
-                    final int k = this.piv[p];
+                    final var k = this.piv[p];
                     this.piv[p] = this.piv[j];
                     this.piv[j] = k;
 
@@ -168,7 +168,7 @@ public class LUDecomposition implements Serializable {
 
                 // Compute multipliers.
                 if ((j < this.m) && (this.LU[j][j] != 0D)) {
-                    for (int i = j + 1; i < this.m; i++) {
+                    for (var i = j + 1; i < this.m; i++) {
                         this.LU[i][j] /= this.LU[j][j];
                     }
                 }
@@ -205,8 +205,7 @@ public class LUDecomposition implements Serializable {
             // det(P) is pivsign
             // det(L) is equal to 1
             // det(U) is the product of the diagonal entries
-            // So lets start with pivsign and multiply with the diagonal
-            // entries.
+            // So lets start with pivsign and multiply with the diagonal entries.
             double det = this.pivsign;
             for (int j = 0; j < this.n; j++) {
                 det *= this.LU[j][j];
@@ -223,8 +222,8 @@ public class LUDecomposition implements Serializable {
      * @return (double) piv
      */
     public double[] getDoublePivot() {
-        final double vals[] = new double[this.m];
-        for (int i = 0; i < this.m; i++) {
+        final var vals = new double[this.m];
+        for (var i = 0; i < this.m; i++) {
             vals[i] = this.piv[i];
         }
         return vals;
@@ -236,17 +235,13 @@ public class LUDecomposition implements Serializable {
      * @return L lower triangular factor
      */
     public Matrix getL() {
-        final double L[][] = new double[this.m][this.n];
-        for (int i = 0; i < this.m; i++) {
-            for (int j = 0; j < i; j++) {
+        final var L = new double[this.m][this.n];
+        for (var i = 0; i < this.m; i++) {
+            for (var j = 0; j < i; j++) {
                 L[i][j] = this.LU[i][j];
             }
 
             L[i][i] = 1D;
-
-            for (int j = i + 1; j < this.n; j++) {
-                L[i][j] = 0;
-            }
         }
         return new Matrix(this.m, this.n, L);
     }
@@ -266,13 +261,9 @@ public class LUDecomposition implements Serializable {
      * @return U upper triangular factor
      */
     public Matrix getU() {
-        final double[][] U = new double[this.n][this.n];
-        for (int i = 0; i < this.n; i++) {
-            for (int j = 0; j < i; j++) {
-                U[i][j] = 0;
-            }
-
-            for (int j = i; j < this.n; j++) {
+        final var U = new double[this.n][this.n];
+        for (var i = 0; i < this.n; i++) {
+            for (var j = i; j < this.n; j++) {
                 U[i][j] = this.LU[i][j];
             }
         }
@@ -285,7 +276,7 @@ public class LUDecomposition implements Serializable {
      * @return true if U, and hence A, is nonsingular.
      */
     public boolean isNonsingular() {
-        for (int j = 0; j < this.n; j++) {
+        for (var j = 0; j < this.n; j++) {
             if (this.LU[j][j] == 0) {
                 return false;
             }
@@ -299,14 +290,16 @@ public class LUDecomposition implements Serializable {
      * @param B
      *            A Matrix with as many rows as A and any number of columns.
      * @return Returns null if matrix row dimensions don't agree or A is
-     *         singular. Returns X so that L*U*X = B(piv,:) otherwise.
+     *         singular. Returns X so that <code>L*U*X = B(piv,:)</code> otherwise.
+     * @throws NullPointerException Iff <code>B == null</code>
      */
+    @Override
     public Matrix solve(final Matrix B) {
         if ((B.getRowDimension() == this.m) && this.isNonsingular()) {
             // Copy right hand side with pivoting
             final int nx = B.getColumnDimension();
-            final Matrix Xmat = B.getMatrix(this.piv, 0, nx - 1);
-            final double X[][] = Xmat.getArray();
+            final var Xmat = B.getMatrix(this.piv, 0, nx - 1);
+            final var X = Xmat.getArray();
 
             // Solve L*Y = B(piv,:)
             for (int k = 0; k < this.n; k++) {

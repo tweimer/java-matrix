@@ -20,7 +20,7 @@ import java.io.Serializable;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class QRDecomposition implements Serializable {
+public class QRDecomposition implements ISolver, Serializable {
     /**
      * For the Serializable interface.
      */
@@ -69,8 +69,8 @@ public class QRDecomposition implements Serializable {
         // Main loop.
         for (int k = 0; k < this.n; k++) {
             // Compute 2-norm of k-th column without under/overflow.
-            double nrm = 0D;
-            for (int i = k; i < this.m; i++) {
+            var nrm = 0D;
+            for (var i = k; i < this.m; i++) {
                 nrm = Maths.hypot(nrm, this.QR[i][k]);
             }
 
@@ -86,12 +86,12 @@ public class QRDecomposition implements Serializable {
 
                 // Apply transformation to remaining columns.
                 for (int j = k + 1; j < this.n; j++) {
-                    double s = 0D;
-                    for (int i = k; i < this.m; i++) {
+                    var s = 0D;
+                    for (var i = k; i < this.m; i++) {
                         s += this.QR[i][k] * this.QR[i][j];
                     }
                     s /= -this.QR[k][k];
-                    for (int i = k; i < this.m; i++) {
+                    for (var i = k; i < this.m; i++) {
                         this.QR[i][j] += s * this.QR[i][k];
                     }
                 }
@@ -106,14 +106,13 @@ public class QRDecomposition implements Serializable {
      * @return Lower trapezoidal matrix whose columns define the reflections
      */
     public Matrix getH() {
-        final Matrix X = new Matrix(this.m, this.n);
-        final double[][] H = X.getArray();
-        for (int i = 0; i < this.m; i++) {
-            for (int j = 0; j <= i; j++) {
+        final var H = new double[this.m][this.n];
+        for (var i = 0; i < this.m; i++) {
+            for (var j = 0; j <= i; j++) {
                 H[i][j] = this.QR[i][j];
             }
         }
-        return X;
+        return new Matrix(this.m, this.n, H);
     }
 
     /**
@@ -122,8 +121,7 @@ public class QRDecomposition implements Serializable {
      * @return Q
      */
     public Matrix getQ() {
-        final Matrix X = new Matrix(this.m, this.n);
-        final double[][] Q = X.getArray();
+        final var Q = new double[this.m][this.n];
         for (int k = this.n - 1; k >= 0; k--) {
             for (int i = 0; i < this.m; i++) {
                 Q[i][k] = 0D;
@@ -131,7 +129,7 @@ public class QRDecomposition implements Serializable {
             Q[k][k] = 1D;
             for (int j = k; j < this.n; j++) {
                 if (this.QR[k][k] != 0) {
-                    double s = 0D;
+                    var s = 0D;
                     for (int i = k; i < this.m; i++) {
                         s += this.QR[i][k] * Q[i][j];
                     }
@@ -142,7 +140,7 @@ public class QRDecomposition implements Serializable {
                 }
             }
         }
-        return X;
+        return new Matrix(this.m, this.n, Q);
     }
 
     /**
@@ -151,14 +149,13 @@ public class QRDecomposition implements Serializable {
      * @return R
      */
     public Matrix getR() {
-        final Matrix X = new Matrix(this.n);
-        final double[][] R = X.getArray();
-        for (int i = 0; i < this.n; i++) {
-            for (int j = i; j < this.n; j++) {
+        final var R = new double[this.n][this.n];
+        for (var i = 0; i < this.n; i++) {
+            for (var j = i; j < this.n; j++) {
                 R[i][j] = ((i < j) ? this.QR[i][j] : this.Rdiag[i]);
             }
         }
-        return X;
+        return new Matrix(this.n, R);
     }
 
     /**
@@ -167,7 +164,7 @@ public class QRDecomposition implements Serializable {
      * @return true if R, and hence A, has full rank.
      */
     public boolean isFullRank() {
-        for (final double r : this.Rdiag) {
+        for (final var r : this.Rdiag) {
             if (r == 0D) {
                 return false;
             }
@@ -180,10 +177,11 @@ public class QRDecomposition implements Serializable {
      *
      * @param B
      *            A Matrix with as many rows as A and any number of columns.
-     * @return Returns null if row dimensions don't agree or matris is rang
+     * @return Returns null if row dimensions don't agree or matrix is rang
      *         deficient. Returns X that minimizes the two norm of Q*R*X-B
      *         Matrix row otherwise.
      */
+    @Override
     public Matrix solve(final Matrix B) {
         if (B.getRowDimension() != this.m) {
             return null;
@@ -192,30 +190,31 @@ public class QRDecomposition implements Serializable {
         }
 
         // Copy right hand side
-        final Matrix M = new Matrix(B);
-        final double[][] X = M.getArray();
+        final var M = new Matrix(B);
+        final var X = M.getArray();
 
         // Compute Y = transpose(Q)*B
         final int nx = B.getColumnDimension();
-        for (int k = 0; k < this.n; k++) {
-            for (int j = 0; j < nx; j++) {
-                double s = 0D;
-                for (int i = k; i < this.m; i++) {
+        for (var k = 0; k < this.n; k++) {
+            for (var j = 0; j < nx; j++) {
+                var s = 0D;
+                for (var i = k; i < this.m; i++) {
                     s += this.QR[i][k] * X[i][j];
                 }
                 s /= -this.QR[k][k];
-                for (int i = k; i < this.m; i++) {
+                for (var i = k; i < this.m; i++) {
                     X[i][j] += s * this.QR[i][k];
                 }
             }
         }
+        
         // Solve R*X = Y;
-        for (int k = this.n - 1; k >= 0; k--) {
-            for (int j = 0; j < nx; j++) {
+        for (var k = this.n - 1; k >= 0; k--) {
+            for (var j = 0; j < nx; j++) {
                 X[k][j] /= this.Rdiag[k];
             }
-            for (int i = 0; i < k; i++) {
-                for (int j = 0; j < nx; j++) {
+            for (var i = 0; i < k; i++) {
+                for (var j = 0; j < nx; j++) {
                     X[i][j] -= X[k][j] * this.QR[i][k];
                 }
             }
