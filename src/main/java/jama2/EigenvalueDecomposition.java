@@ -1,14 +1,8 @@
 package jama2;
 
-import static jama2.util.Maths.eps;
-import static jama2.util.Maths.hypot;
-import static jama2.util.Maths.norm1;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.abs;
-import static java.lang.Math.sqrt;
-
 import java.io.*;
+
+import jama2.util.Maths;
 
 /**
  * Eigenvalues and eigenvectors of a real matrix.
@@ -153,7 +147,7 @@ public class EigenvalueDecomposition implements Serializable {
      */
     private void cdiv(final double xr, final double xi, final double yr, final double yi) {
         final double r, d1;
-        if (abs(yr) > abs(yi)) {
+        if (Math.abs(yr) > Math.abs(yi)) {
             r = yi / yr;
             d1 = yr + (r * yi);
             this.cdivr = (xr + (r * xi)) / d1;
@@ -175,9 +169,6 @@ public class EigenvalueDecomposition implements Serializable {
         final Matrix X = new Matrix(this.n, this.n);
         final double[][] D = X.getArray();
         for (int i = 0; i < this.n; i++) {
-            for (int j = 0; j < this.n; j++) {
-                D[i][j] = 0.0;
-            }
             D[i][i] = this.d[i];
             if (this.e[i] > 0) {
                 D[i][i + 1] = this.e[i];
@@ -236,8 +227,8 @@ public class EigenvalueDecomposition implements Serializable {
                 this.d[i] = this.H[i][i];
                 this.e[i] = 0.0;
             }
-            for (int j = max(i - 1, 0); j < nn; j++) {
-                norm += abs(this.H[i][j]);
+            for (int j = Math.max(i - 1, 0); j < nn; j++) {
+                norm += Math.abs(this.H[i][j]);
             }
         }
 
@@ -247,11 +238,11 @@ public class EigenvalueDecomposition implements Serializable {
             // Look for single small sub-diagonal element
             int l = n1;
             while (l > low) {
-                s = abs(this.H[l - 1][l - 1]) + abs(this.H[l][l]);
+                s = Math.abs(this.H[l - 1][l - 1]) + Math.abs(this.H[l][l]);
                 if (s == 0D) {
                     s = norm;
                 }
-                if (abs(this.H[l][l - 1]) < (eps * s)) {
+                if (Math.abs(this.H[l][l - 1]) < (Maths.eps * s)) {
                     break;
                 } else {
                     l--;
@@ -271,7 +262,7 @@ public class EigenvalueDecomposition implements Serializable {
                 w = this.H[n1][n1 - 1] * this.H[n1 - 1][n1];
                 p = (this.H[n1 - 1][n1 - 1] - this.H[n1][n1]) / 2.0;
                 q = (p * p) + w;
-                z = sqrt(abs(q));
+                z = Math.sqrt(Math.abs(q));
                 this.H[n1 - 1][n1 - 1] += exshift;
                 x = (this.H[n1][n1] += exshift);
 
@@ -284,10 +275,10 @@ public class EigenvalueDecomposition implements Serializable {
                     }
                     this.e[n1 - 1] = this.e[n1] = 0D;
                     x = this.H[n1][n1 - 1];
-                    s = abs(x) + abs(z);
+                    s = Math.abs(x) + Math.abs(z);
                     p = x / s;
                     q = z / s;
-                    r = sqrt((p * p) + (q * q));
+                    r = Math.sqrt((p * p) + (q * q));
                     p /= r;
                     q /= r;
 
@@ -338,7 +329,7 @@ public class EigenvalueDecomposition implements Serializable {
                     for (int i = low; i <= n1; i++) {
                         this.H[i][i] -= x;
                     }
-                    s = abs(this.H[n1][n1 - 1]) + abs(this.H[n1 - 1][n1 - 2]);
+                    s = Math.abs(this.H[n1][n1 - 1]) + Math.abs(this.H[n1 - 1][n1 - 2]);
                     x = y = 0.75 * s;
                     w = -0.4375 * s * s;
                 }
@@ -348,7 +339,7 @@ public class EigenvalueDecomposition implements Serializable {
                     s = (y - x) / 2.0;
                     s = (s * s) + w;
                     if (s > 0) {
-                        s = sqrt(s);
+                        s = Math.sqrt(s);
                         if (y < x) {
                             s = -s;
                         }
@@ -372,15 +363,15 @@ public class EigenvalueDecomposition implements Serializable {
                     p = (((r * s) - w) / this.H[m + 1][m]) + this.H[m][m + 1];
                     q = this.H[m + 1][m + 1] - z - r - s;
                     r = this.H[m + 2][m + 1];
-                    s = norm1(p, q, r);
+                    s = Maths.norm1(p, q, r);
                     p /= s;
                     q /= s;
                     r /= s;
                     if (m == l) {
                         break;
                     }
-                    if ((abs(this.H[m][m - 1]) * (abs(q) + abs(r))) < (eps
-                            * (abs(p) * (abs(this.H[m - 1][m - 1]) + abs(z) + abs(this.H[m + 1][m + 1]))))) {
+                    if ((Math.abs(this.H[m][m - 1]) * (Math.abs(q) + Math.abs(r))) < (Maths.eps
+                            * (Math.abs(p) * (Math.abs(this.H[m - 1][m - 1]) + Math.abs(z) + Math.abs(this.H[m + 1][m + 1]))))) {
                         break;
                     }
                     m--;
@@ -400,7 +391,7 @@ public class EigenvalueDecomposition implements Serializable {
                         p = this.H[k][k - 1];
                         q = this.H[k + 1][k - 1];
                         r = (notlast ? this.H[k + 2][k - 1] : 0.0);
-                        x = norm1(p, q, r);
+                        x = Maths.norm1(p, q, r);
                         if (x == 0D) {
                             continue;
                         } else {
@@ -410,7 +401,7 @@ public class EigenvalueDecomposition implements Serializable {
                         }
                     }
 
-                    s = hypot(p, q, r);
+                    s = Maths.hypot(p, q, r);
                     if (p < 0) {
                         s = -s;
                     }
@@ -439,7 +430,7 @@ public class EigenvalueDecomposition implements Serializable {
                         }
 
                         // Column modification
-                        for (int i = 0; i <= min(n1, k + 3); i++) {
+                        for (int i = 0; i <= Math.min(n1, k + 3); i++) {
                             p = (x * this.H[i][k]) + (y * this.H[i][k + 1]);
                             if (notlast) {
                                 p += (z * this.H[i][k + 2]);
@@ -489,7 +480,7 @@ public class EigenvalueDecomposition implements Serializable {
                     } else {
                         l = i;
                         if (this.e[i] == 0D) {
-                            this.H[i][n1] = -r / ((w != 0D) ? w : (eps * norm));
+                            this.H[i][n1] = -r / ((w != 0D) ? w : (Maths.eps * norm));
                             // Solve real equations
                         } else {
                             x = this.H[i][i + 1];
@@ -497,12 +488,12 @@ public class EigenvalueDecomposition implements Serializable {
                             q = ((this.d[i] - p) * (this.d[i] - p)) + (this.e[i] * this.e[i]);
                             t = ((x * s) - (z * r)) / q;
                             this.H[i][n1] = t;
-                            this.H[i + 1][n1] = (abs(x) > abs(z)) ? ((-r - (w * t)) / x) : ((-s - (y * t)) / z);
+                            this.H[i + 1][n1] = (Math.abs(x) > Math.abs(z)) ? ((-r - (w * t)) / x) : ((-s - (y * t)) / z);
                         }
 
                         // Overflow control
-                        t = abs(this.H[i][n1]);
-                        if ((eps * (t * t)) > 1) {
+                        t = Math.abs(this.H[i][n1]);
+                        if ((Maths.eps * (t * t)) > 1) {
                             for (int j = i; j <= n1; j++) {
                                 this.H[j][n1] /= t;
                             }
@@ -515,7 +506,7 @@ public class EigenvalueDecomposition implements Serializable {
                 int l = n1 - 1;
 
                 // Last vector component imaginary so matrix is triangular
-                if (abs(this.H[n1][n1 - 1]) > abs(this.H[n1 - 1][n1])) {
+                if (Math.abs(this.H[n1][n1 - 1]) > Math.abs(this.H[n1 - 1][n1])) {
                     this.H[n1 - 1][n1 - 1] = q / this.H[n1][n1 - 1];
                     this.H[n1 - 1][n1] = -(this.H[n1][n1] - p) / this.H[n1][n1 - 1];
                 } else {
@@ -551,12 +542,12 @@ public class EigenvalueDecomposition implements Serializable {
                             vr = (((this.d[i] - p) * (this.d[i] - p)) + (this.e[i] * this.e[i])) - (q * q);
                             vi = (this.d[i] - p) * 2D * q;
                             if ((vr == 0D) && (vi == 0D)) {
-                                vr = eps * norm * (abs(w) + abs(q) + abs(x) + abs(y) + abs(z));
+                                vr = Maths.eps * norm * (Math.abs(w) + Math.abs(q) + Math.abs(x) + Math.abs(y) + Math.abs(z));
                             }
                             this.cdiv(((x * r) - (z * ra)) + (q * sa), (x * s) - (z * sa) - (q * ra), vr, vi);
                             rowHi[n1 - 1] = this.cdivr;
                             rowHi[n1] = this.cdivi;
-                            if (abs(x) > (abs(z) + abs(q))) {
+                            if (Math.abs(x) > Math.abs(z) + Math.abs(q)) {
                                 rowHi2[n1 - 1] = ((-ra - (w * rowHi[n1 - 1])) + (q * rowHi[n1])) / x;
                                 rowHi2[n1] = (-sa - (w * rowHi[n1]) - (q * rowHi[n1 - 1])) / x;
                             } else {
@@ -567,8 +558,8 @@ public class EigenvalueDecomposition implements Serializable {
                         }
 
                         // Overflow control
-                        t = max(abs(rowHi[n1 - 1]), abs(rowHi[n1]));
-                        if ((eps * (t * t)) > 1) {
+                        t = Math.max(Math.abs(rowHi[n1 - 1]), Math.abs(rowHi[n1]));
+                        if ((Maths.eps * (t * t)) > 1) {
                             for (int j = i; j <= n1; j++) {
                                 this.H[j][n1 - 1] /= t;
                                 this.H[j][n1] /= t;
@@ -591,11 +582,11 @@ public class EigenvalueDecomposition implements Serializable {
         // Back transformation to get eigenvectors of original matrix
         for (int j = nn - 1; j >= low; j--) {
             for (int i = low; i <= high; i++) {
-                z = 0D;
-                for (int k = low; k <= min(j, high); k++) {
-                    z += (this.V[i][k] * this.H[k][j]);
+                var tmp = 0D;
+                for (int k = low; k <= Math.min(j, high); k++) {
+                    tmp += (this.V[i][k] * this.H[k][j]);
                 }
-                this.V[i][j] = z;
+                this.V[i][j] = tmp;
             }
         }
     }
@@ -613,9 +604,9 @@ public class EigenvalueDecomposition implements Serializable {
 
         for (int m = low + 1; m <= (high - 1); m++) {
             // Scale column.
-            double scale = 0D;
+            var scale = 0D;
             for (int i = m; i <= high; i++) {
-                scale += abs(this.H[i][m - 1]);
+                scale += Math.abs(this.H[i][m - 1]);
             }
             if (scale != 0D) {
                 // Compute Householder transformation.
@@ -624,10 +615,11 @@ public class EigenvalueDecomposition implements Serializable {
                     this.ort[i] = (this.H[i][m - 1] / scale);
                     h += (this.ort[i] * this.ort[i]);
                 }
-                double g = sqrt(h);
+                var g = Math.sqrt(h);
                 if (this.ort[m] > 0) {
                     g = -g;
                 }
+                
                 h -= (this.ort[m] * g);
                 this.ort[m] -= g;
 
@@ -645,7 +637,7 @@ public class EigenvalueDecomposition implements Serializable {
                 }
 
                 for (int i = 0; i <= high; i++) {
-                    double f = 0D;
+                    var f = 0D;
                     for (int j = high; j >= m; j--) {
                         f += this.ort[j] * this.H[i][j];
                     }
@@ -703,13 +695,13 @@ public class EigenvalueDecomposition implements Serializable {
         double f = 0D, tst1 = 0D;
         for (int l = 0; l < this.n; l++) {
             // Find small subdiagonal element
-            final double tst2 = abs(this.d[l]) + abs(this.e[l]);
+            final double tst2 = Math.abs(this.d[l]) + Math.abs(this.e[l]);
             if (tst1 < tst2) {
                 tst1 = tst2;
             }
             int m = l;
             while (m < this.n) {
-                if (abs(this.e[m]) <= (eps * tst1)) {
+                if (Math.abs(this.e[m]) <= (Maths.eps * tst1)) {
                     break;
                 } else {
                     m++;
@@ -721,7 +713,8 @@ public class EigenvalueDecomposition implements Serializable {
             if (m > l) {
                 do {
                     // Compute implicit shift
-                    double g = this.d[l], p = (this.d[l + 1] - g) / (2D * this.e[l]), r = hypot(p, 1D);
+                    double g = this.d[l], p = (this.d[l + 1] - g) / (2D * this.e[l]),
+                            r = Maths.hypot(p, 1D);
                     if (p < 0) {
                         r = -r;
                     }
@@ -742,7 +735,7 @@ public class EigenvalueDecomposition implements Serializable {
                         s2 = s;
                         g = c * this.e[i];
                         h = c * p;
-                        r = hypot(p, this.e[i]);
+                        r = Maths.hypot(p, this.e[i]);
                         this.e[i + 1] = s * r;
                         s = this.e[i] / r;
                         c = p / r;
@@ -760,7 +753,7 @@ public class EigenvalueDecomposition implements Serializable {
                     this.e[l] = s * p;
                     this.d[l] = c * p;
                     // Check for convergence.
-                } while (abs(this.e[l]) > (eps * tst1));
+                } while (Math.abs(this.e[l]) > (Maths.eps * tst1));
             }
             this.d[l] += f;
             this.e[l] = 0D;
@@ -809,7 +802,7 @@ public class EigenvalueDecomposition implements Serializable {
             // Scale to avoid under/overflow.
             double scale = 0.0, h = 0.0;
             for (int k = 0; k < i; k++) {
-                scale += abs(this.d[k]);
+                scale += Math.abs(this.d[k]);
             }
             if (scale == 0.0) {
                 this.e[i] = this.d[i - 1];
@@ -823,7 +816,7 @@ public class EigenvalueDecomposition implements Serializable {
                     this.d[k] /= scale;
                     h += this.d[k] * this.d[k];
                 }
-                double f = this.d[i - 1], g = sqrt(h);
+                double f = this.d[i - 1], g = Math.sqrt(h);
                 if (f > 0D) {
                     g = -g;
                 }
