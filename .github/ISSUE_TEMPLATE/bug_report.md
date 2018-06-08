@@ -4,32 +4,19 @@ about: Create a report to help us improve
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+### Expected behavior
+What did you expect?
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+### Actual behavior
+What did you get instead?
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+### Does it work in stable version?
+If you know in which dev build (or approximate date when) it was broken, it may be much easier to identify and fix the issue.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+### Steps to reproduce that behavior
+ * Provide step-by-step instructions so we can reproduce the issue (We can't fix what we can't reproduce).
+ * Attach your VersionInfo.
+ * Attach a crash report if you are experiencing crashes (It includes VersionInfo as well).
+ * Attach a network log captured if you are experiencing connectivity issues.
+ * If Miranda freezes, hangs up or consumes CPU, attach information obtained by Process Explorer tool.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.
