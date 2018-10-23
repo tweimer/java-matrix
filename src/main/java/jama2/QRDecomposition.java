@@ -20,7 +20,7 @@ import java.io.Serializable;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class QRDecomposition implements ISolver, Serializable {
+public class QRDecomposition implements ISolver, IMatrix, Serializable {
     /**
      * For the Serializable interface.
      */
@@ -221,4 +221,15 @@ public class QRDecomposition implements ISolver, Serializable {
         }
         return M.getMatrix(0, this.n - 1, 0, nx - 1);
     }
+
+    /**
+     * Returns the elements of the QRDecomposition
+     * @param i row index
+     * @param j column index
+     * @return value
+     */
+	@Override
+	public double get(final int i, final int j) {
+		return this.QR[i][j] ;
+	}
 }

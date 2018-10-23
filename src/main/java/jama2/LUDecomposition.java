@@ -23,7 +23,7 @@ import java.util.Arrays;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class LUDecomposition implements ISolver, Serializable {
+public class LUDecomposition implements ISolver, IMatrix, Serializable {
     /**
      * For the Serializeable interface
      */
@@ -326,4 +326,16 @@ public class LUDecomposition implements ISolver, Serializable {
             return null;
         }
     }
+
+
+    /**
+     * Returns the elements of the LUDecomposition
+     * @param i row index
+     * @param j column index
+     * @return value
+     */
+	@Override
+	public double get(final int i, final int j) {
+		return this.LU[i][j];
+	}
 }

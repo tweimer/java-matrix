@@ -11,8 +11,8 @@
     <packaging>jar</packaging>
 
     <properties>
-		<maven.compiler.source>1.10</maven.compiler.source>
-		<maven.compiler.target>1.10</maven.compiler.target>
+		<maven.compiler.source>1.11</maven.compiler.source>
+		<maven.compiler.target>1.11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -25,21 +25,15 @@
 	</licenses>
 
 	<build>
-		<pluginManagement>
-            <plugins>
-                <plugin>
-                  <groupId>com.github.spotbugs</groupId>
-                  <artifactId>spotbugs-maven-plugin</artifactId>
-                  <version>3.1.1-SNAPSHOT</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>2.7</version>
-                </plugin>
-            </plugins>
-		</pluginManagement>
-	</build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.7</version>
+            </plugin>
+        </plugins>
+    </build>
 
 	<scm>
 		<url>https://github.com/tweimer/java-matrix</url>
@@ -68,36 +62,50 @@
 			<id>jHicklin</id>
 			<name>Joe Hicklin</name>
 			<email />
+            <organization>The MathWorks</organization>
+            <organizationUrl>https://www.mathworks.com/</organizationUrl>
 		</developer>
 		<developer>
 			<id>cmoler</id>
 			<name>Cleve Moler</name>
 			<email />
+            <organization>The MathWorks</organization>
+            <organizationUrl>https://www.mathworks.com/</organizationUrl>
 		</developer>
 		<developer>
 			<id>pwebb</id>
 			<name>Peter Webb</name>
 			<email />
+            <organization>The MathWorks</organization>
+            <organizationUrl>https://www.mathworks.com/</organizationUrl>
 		</developer>
 		<developer>
 			<id>rboisvert</id>
 			<name>Ronald F. Boisvert </name>
 			<email>boisvert@nist.gov</email>
+            <organization>NIST</organization>
+            <organizationUrl>https://www.nist.gov</organizationUrl>
 		</developer>
 		<developer>
 			<id>bmiller</id>
 			<name>Bruce Miller </name>
 			<email>bruce.miller@nist.gov</email>
+            <organization>NIST</organization>
+            <organizationUrl>https://www.nist.gov</organizationUrl>
 		</developer>
 		<developer>
 			<id>rpozo</id>
-			<name>Roldan Pozob</name>
+			<name>Roldan Pozo</name>
 			<email>pozo@nist.gov</email>
+            <organization>NIST</organization>
+            <organizationUrl>https://www.nist.gov</organizationUrl>
 		</developer>
 		<developer>
 			<id>kremington</id>
 			<name>Dr. Karin A. Remington</name>
 			<email>kremington@nist.gov</email>
+            <organization>NIST</organization>
+            <organizationUrl>https://www.nist.gov</organizationUrl>
 		</developer>
 		<developer>
 			<id>tweimer</id>
@@ -106,4 +114,8 @@
 		</developer>
 	</developers>
 
+	<organization>
+		<url>https://www.nist.gov/</url>
+		<name>NIST</name>
+	</organization>
 </project>

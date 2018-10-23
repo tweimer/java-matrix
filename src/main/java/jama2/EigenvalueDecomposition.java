@@ -218,7 +218,7 @@ public class EigenvalueDecomposition implements Serializable {
         final int nn = this.n;
         int n1 = nn - 1;
         final int low = 0, high = nn - 1;
-        double exshift = 0.0, p = 0, q = 0, r = 0, s = 0, z = 0, t, w, x, y;
+        double exshift = 0.0, p = 0, q = 0, r = 0, s = 0, z = 0;
 
         // Store roots isolated by balanc and compute matrix norm
         double norm = 0.0;
@@ -259,12 +259,12 @@ public class EigenvalueDecomposition implements Serializable {
             }
             // Two roots found
             else if (l == (n1 - 1)) {
-                w = this.H[n1][n1 - 1] * this.H[n1 - 1][n1];
+                var w = this.H[n1][n1 - 1] * this.H[n1 - 1][n1];
                 p = (this.H[n1 - 1][n1 - 1] - this.H[n1][n1]) / 2.0;
                 q = (p * p) + w;
                 z = Math.sqrt(Math.abs(q));
                 this.H[n1 - 1][n1 - 1] += exshift;
-                x = (this.H[n1][n1] += exshift);
+                var x = (this.H[n1][n1] += exshift);
 
                 // Real pair
                 if (q >= 0) {
@@ -315,9 +315,9 @@ public class EigenvalueDecomposition implements Serializable {
             }
             // Form shift
             else {
-                x = this.H[n1][n1];
-                y = 0.0;
-                w = 0.0;
+                var x = this.H[n1][n1];
+                var y = 0D;
+                var w = 0D;
                 if (l < n1) {
                     y = this.H[n1 - 1][n1 - 1];
                     w = this.H[n1][n1 - 1] * this.H[n1 - 1][n1];
@@ -469,7 +469,7 @@ public class EigenvalueDecomposition implements Serializable {
                 int l = n1;
                 this.H[n1][n1] = 1.0;
                 for (int i = n1 - 1; i >= 0; i--) {
-                    w = this.H[i][i] - p;
+                    var w = this.H[i][i] - p;
                     r = 0.0;
                     for (int j = l; j <= n1; j++) {
                         r += (this.H[i][j] * this.H[j][n1]);
@@ -483,16 +483,16 @@ public class EigenvalueDecomposition implements Serializable {
                             this.H[i][n1] = -r / ((w != 0D) ? w : (Maths.eps * norm));
                             // Solve real equations
                         } else {
-                            x = this.H[i][i + 1];
-                            y = this.H[i + 1][i];
+                            var x = this.H[i][i + 1];
+                            var y = this.H[i + 1][i];
                             q = ((this.d[i] - p) * (this.d[i] - p)) + (this.e[i] * this.e[i]);
-                            t = ((x * s) - (z * r)) / q;
+                            final var t = ((x * s) - (z * r)) / q;
                             this.H[i][n1] = t;
                             this.H[i + 1][n1] = (Math.abs(x) > Math.abs(z)) ? ((-r - (w * t)) / x) : ((-s - (y * t)) / z);
                         }
 
                         // Overflow control
-                        t = Math.abs(this.H[i][n1]);
+                        var t = Math.abs(this.H[i][n1]);
                         if ((Maths.eps * (t * t)) > 1) {
                             for (int j = i; j <= n1; j++) {
                                 this.H[j][n1] /= t;
@@ -518,12 +518,12 @@ public class EigenvalueDecomposition implements Serializable {
                 this.H[n1][n1] = 1D;
                 for (int i = n1 - 2; i >= 0; i--) {
                     final double[] rowHi = this.H[i], rowHi2 = this.H[i + 1];
-                    double ra = 0D, sa = 0D, vr, vi;
+                    double ra = 0D, sa = 0D;
                     for (int j = l; j <= n1; j++) {
                         ra += (rowHi[j] * this.H[j][n1 - 1]);
                         sa += (rowHi[j] * this.H[j][n1]);
                     }
-                    w = this.H[i][i] - p;
+                    var w = this.H[i][i] - p;
 
                     if (this.e[i] < 0.0) {
                         z = w;
@@ -537,10 +537,10 @@ public class EigenvalueDecomposition implements Serializable {
                             rowHi[n1] = this.cdivi;
                         } else {
                             // Solve complex equations
-                            x = rowHi[i + 1];
-                            y = rowHi2[i];
-                            vr = (((this.d[i] - p) * (this.d[i] - p)) + (this.e[i] * this.e[i])) - (q * q);
-                            vi = (this.d[i] - p) * 2D * q;
+                            var x = rowHi[i + 1];
+                            var y = rowHi2[i];
+                            var vr = (((this.d[i] - p) * (this.d[i] - p)) + (this.e[i] * this.e[i])) - (q * q);
+                            var vi = (this.d[i] - p) * 2D * q;
                             if ((vr == 0D) && (vi == 0D)) {
                                 vr = Maths.eps * norm * (Math.abs(w) + Math.abs(q) + Math.abs(x) + Math.abs(y) + Math.abs(z));
                             }
@@ -558,7 +558,7 @@ public class EigenvalueDecomposition implements Serializable {
                         }
 
                         // Overflow control
-                        t = Math.max(Math.abs(rowHi[n1 - 1]), Math.abs(rowHi[n1]));
+                        final var t = Math.max(Math.abs(rowHi[n1 - 1]), Math.abs(rowHi[n1]));
                         if ((Maths.eps * (t * t)) > 1) {
                             for (int j = i; j <= n1; j++) {
                                 this.H[j][n1 - 1] /= t;

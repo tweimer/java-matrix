@@ -19,7 +19,7 @@ import java.io.Serializable;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class CholeskyDecomposition implements Serializable {
+public class CholeskyDecomposition implements IMatrix, Serializable {
     /**
      * For the Serializable interface.
      */
@@ -243,4 +243,15 @@ public class CholeskyDecomposition implements Serializable {
             return M;
         }
     }
+    
+    /**
+     * Returns the elements of the CholeskyDecomposition
+     * @param i row index
+     * @param j column index
+     * @return value
+     */
+	@Override
+	public double get(int i, int j) {
+		return this.L[i][j];
+	}
 }

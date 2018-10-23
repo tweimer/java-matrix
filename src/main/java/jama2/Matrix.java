@@ -86,8 +86,10 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @param A
      *            Two-dimensional array of doubles.
      * @return Matrix with copied array
-     * @exception IllegalArgumentException
+     * @throws IllegalArgumentException
      *                All rows must have the same length
+     * @throws NullPointerException
+     *                Iff A or any sub-array is {@code null}.
      */
     public static Matrix constructWithCopy(final double[][] A) {
         final var m = A.length;
@@ -109,13 +111,16 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @param d
      *            diagonal elements
      * @return diagonal Matrix
+     * @throws NullPointerException
+     *    Iff {@code d == null}
      */
     public static Matrix diag(final double... d) {
-        final Matrix D = new Matrix(d.length);
-        for (int i = 0; i < d.length; i++) {
-            D.set(i, i, d[i]);
+        final var n = d.length;
+        final var diag = new double[n][n];
+        for (var i = 0; i < n; i++) {
+            diag[i][i] = d[i];
         }
-        return D;
+        return new Matrix(n, diag);
     }
 
     /**
@@ -123,7 +128,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *
      * @param m
      *            Number of rows and colums.
-     * @return An m-by-n matrix with ones on the diagonal and zeros elsewhere.
+     * @return An m-by-n square matrix with ones on the diagonal and zeros elsewhere.
      */
     public static Matrix identity(final int m) {
         return Matrix.identity(m, m);
@@ -139,7 +144,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return An m-by-n matrix with ones on the diagonal and zeros elsewhere.
      */
     public static Matrix identity(final int m, final int n) {
-        final Matrix I = new Matrix(m, n);
+        final var I = new Matrix(m, n);
         I.identity();
         return I;
     }
@@ -165,7 +170,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return An m-by-n matrix with uniformly distributed random elements.
      */
     public static Matrix random(final int m, final int n) {
-        final Matrix R = new Matrix(m, n);
+        final var R = new Matrix(m, n);
         R.random();
         return R;
     }
@@ -191,7 +196,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @return An m-by-n matrix with uniformly distributed random elements.
      */
     public static Matrix randomInt(final int m, final int n) {
-        final Matrix A = new Matrix(m, n);
+        final var A = new Matrix(m, n);
         A.randomInt();
         return A;
     }
@@ -239,7 +244,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
         // Now we've got the number of columns!
         final var n = vD.size();
         var row = new double[n];
-        int j = 0;
+        var j = 0;
         for (final var d : vD) {
             // extract the elements of the 1st row.
             row[j++] = d.doubleValue();
@@ -428,7 +433,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
     *            Any {@link RuntimeException} in {@link IMatrix#get(int, int)} is thrown back to the caller.
     */
     public Matrix(final int m, final int n, IMatrix matrix) {
-        this(n, m);
+        this(m, n);
         for (var i = 0; i < this.A.length; i++) {
             for (var j = 0; j < this.A[i].length; j++) {
                 this.A[i][j] = matrix.get(i, j);
@@ -450,7 +455,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @param f This is applied after parameter matrix is evaluated.
      */
      public Matrix(final int m, final int n, IMatrix matrix, DoubleUnaryOperator f) {
-         this(n, m);
+         this(m, n);
          for (var i = 0; i < this.A.length; i++) {
              for (var j = 0; j < this.A[i].length; j++) {
                  this.A[i][j] = f.applyAsDouble(matrix.get(i, j));
@@ -883,13 +888,13 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
     public Matrix getMatrix(final int r[], final int c[]) {
         final var m1 = r.length;
         final var n1 = c.length;
-        final var M = new Matrix(m1, n1);
+        final var A = new double[m1][n1];
         for (var i = 0; i < m1; i++) {
             for (var j = 0; j < n1; j++) {
-                M.A[i][j] = this.A[r[i]][c[j]];
+                A[i][j] = this.A[r[i]][c[j]];
             }
         }
-        return M;
+        return new Matrix(m1, n1, A);
     }
 
     /**
@@ -928,9 +933,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @see #solve
      */
     public Matrix inverse() {
-        final var I = new Matrix(this.m);
-        I.identity();
-        return this.solve(I);
+        return solve(identity(m));
     }
 
     /**
@@ -962,13 +965,13 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public Matrix minus(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final var M = new Matrix(this.m, this.n);
+        final var A = new double[m][n];
         for (var i = 0; i < this.A.length; i++) {
             for (var j = 0; j < this.A[i].length; j++) {
-                M.A[i][j] = this.A[i][j] - B.A[i][j];
+                A[i][j] = this.A[i][j] - B.A[i][j];
             }
         }
-        return M;
+        return new Matrix(m, n, A);
     }
 
     /**
