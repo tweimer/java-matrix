@@ -325,7 +325,7 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *            the given array, it just stores it's reference.
      *            You should avoid modifying that array afterwards,
      *            as this matrix is backed by that array
-     * @exception IllegalArgumentException
+     * @throws IllegalArgumentException
      *                All rows must have the same length
      * @see #constructWithCopy 
      */

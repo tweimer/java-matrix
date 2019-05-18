@@ -75,7 +75,7 @@ public class SingularValueDecomposition implements Serializable {
     SingularValueDecomposition(final Matrix Arg) {
         // Derived from LINPACK code.
         // Initialize.
-        final double[][] A = Arg.getArrayCopy();
+        final var A = Arg.getArrayCopy();
         this.m = Arg.getRowDimension();
         this.n = Arg.getColumnDimension();
         final int nu = min(this.m, this.n);
@@ -125,7 +125,7 @@ public class SingularValueDecomposition implements Serializable {
             for (int j = k + 1; j < this.n; j++) {
                 if ((k < nct) && (this.s[k] != 0D)) {
                     // Apply the transformation.
-                    double t = 0D;
+                    var t = 0D;
                     for (int i = k; i < this.m; i++) {
                         t += A[i][k] * A[i][j];
                     }
@@ -144,7 +144,7 @@ public class SingularValueDecomposition implements Serializable {
             if (wantu && (k < nct)) {
                 // Place the transformation in U for subsequent back
                 // multiplication.
-                for (int i = k; i < this.m; i++) {
+                for (var i = k; i < this.m; i++) {
                     this.U[i][k] = A[i][k];
                 }
             }
@@ -154,7 +154,7 @@ public class SingularValueDecomposition implements Serializable {
                 // k-th super-diagonal in e[k].
                 // Compute 2-norm without under/overflow.
                 e[k] = 0D;
-                for (int i = k + 1; i < this.n; i++) {
+                for (var i = k + 1; i < this.n; i++) {
                     e[k] = hypot(e[k], e[i]);
                 }
 
@@ -162,26 +162,26 @@ public class SingularValueDecomposition implements Serializable {
                     if (e[k + 1] < 0D) {
                         e[k] = -e[k];
                     }
-                    for (int i = k + 1; i < this.n; i++) {
+                    for (var i = k + 1; i < this.n; i++) {
                         e[i] /= e[k];
                     }
                     e[k + 1]++;
                 }
                 e[k] = -e[k];
 
-                if (((k + 1) < this.m) && (e[k] != 0.0)) {
+                if ((k + 1 < this.m) && (e[k] != 0.0)) {
                     // Apply the transformation.
-                    for (int i = k + 1; i < this.m; i++) {
+                    for (var i = k + 1; i < this.m; i++) {
                         work[i] = 0D;
                     }
-                    for (int j = k + 1; j < this.n; j++) {
-                        for (int i = k + 1; i < this.m; i++) {
+                    for (var j = k + 1; j < this.n; j++) {
+                        for (var i = k + 1; i < this.m; i++) {
                             work[i] += (e[j] * A[i][j]);
                         }
                     }
-                    for (int j = k + 1; j < this.n; j++) {
-                        final double t = -e[j] / e[k + 1];
-                        for (int i = k + 1; i < this.m; i++) {
+                    for (var j = k + 1; j < this.n; j++) {
+                        final var t = -e[j] / e[k + 1];
+                        for (var i = k + 1; i < this.m; i++) {
                             A[i][j] += (t * work[i]);
                         }
                     }
@@ -190,7 +190,7 @@ public class SingularValueDecomposition implements Serializable {
                 if (wantv) {
                     // Place the transformation in V for subsequent back
                     // multiplication.
-                    for (int i = k + 1; i < this.n; i++) {
+                    for (var i = k + 1; i < this.n; i++) {
                         this.V[i][k] = e[i];
                     }
                 }
@@ -198,7 +198,7 @@ public class SingularValueDecomposition implements Serializable {
         }
 
         // Set up the final bidiagonal matrix or order p.
-        int p = min(this.n, this.m + 1);
+        var p = min(this.n, this.m + 1);
         if (nct < this.n) {
             this.s[nct] = A[nct][nct];
         }
@@ -207,7 +207,7 @@ public class SingularValueDecomposition implements Serializable {
             this.s[p - 1] = 0D;
         }
 
-        if ((nrt + 1) < p) {
+        if (nrt + 1 < p) {
             e[nrt] = A[nrt][p - 1];
         }
 
@@ -216,7 +216,7 @@ public class SingularValueDecomposition implements Serializable {
         // If required, generate U.
         if (wantu) {
             for (int j = nct; j < nu; j++) {
-                for (final double[] rowU : this.U) {
+                for (final var rowU : this.U) {
                     rowU[j] = 0D;
                 }
                 this.U[j][j] = 1D;
@@ -225,7 +225,7 @@ public class SingularValueDecomposition implements Serializable {
             for (int k = nct - 1; k >= 0; k--) {
                 if (this.s[k] != 0D) {
                     for (int j = k + 1; j < nu; j++) {
-                        double t = 0D;
+                        var t = 0D;
                         for (int i = k; i < this.m; i++) {
                             t += this.U[i][k] * this.U[i][j];
                         }
@@ -240,11 +240,11 @@ public class SingularValueDecomposition implements Serializable {
                     }
                     this.U[k][k]++;
 
-                    for (int i = 0; i < (k - 1); i++) {
+                    for (var i = 0; i < (k - 1); i++) {
                         this.U[i][k] = 0D;
                     }
                 } else {
-                    for (final double[] rowU : this.U) {
+                    for (final var rowU : this.U) {
                         rowU[k] = 0D;
                     }
                     this.U[k][k] = 1D;
@@ -257,13 +257,13 @@ public class SingularValueDecomposition implements Serializable {
             for (int k = this.n - 1; k >= 0; k--) {
                 if ((k < nrt) && (e[k] != 0D)) {
                     for (int j = k + 1; j < nu; j++) {
-                        double t = 0;
-                        for (int i = k + 1; i < this.n; i++) {
+                        var t = 0;
+                        for (var i = k + 1; i < this.n; i++) {
                             t += this.V[i][k] * this.V[i][j];
                         }
                         t /= -this.V[k + 1][k];
 
-                        for (int i = k + 1; i < this.n; i++) {
+                        for (var i = k + 1; i < this.n; i++) {
                             this.V[i][j] += t * this.V[i][k];
                         }
                     }
@@ -276,7 +276,7 @@ public class SingularValueDecomposition implements Serializable {
         }
 
         // Main iteration loop for the singular values.
-        final int pp = p - 1;
+        final var pp = p - 1;
         while (p > 0) {
             int k = p - 2;
             for (; k >= -1; k--) {
@@ -367,7 +367,7 @@ public class SingularValueDecomposition implements Serializable {
                 e[k - 1] = 0D;
 
                 for (int j = k; j < p; j++) {
-                    double t = hypot(this.s[j], f);
+                    var t = hypot(this.s[j], f);
                     final double cs = (this.s[j] / t), sn = (f / t);
                     this.s[j] = t;
                     f = -sn * e[j];
@@ -515,12 +515,7 @@ public class SingularValueDecomposition implements Serializable {
      * @return S
      */
     public Matrix getS() {
-        final Matrix X = new Matrix(this.n);
-        final double[][] S = X.getArray();
-        for (int i = 0; i < this.n; i++) {
-            S[i][i] = this.s[i];
-        }
-        return X;
+        return Matrix.diag(s);
     }
 
     /**

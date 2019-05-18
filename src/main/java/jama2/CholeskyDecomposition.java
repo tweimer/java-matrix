@@ -135,23 +135,23 @@ public class CholeskyDecomposition implements IMatrix, Serializable {
      */
     CholeskyDecomposition(final Matrix Arg) {
         // Initialize.
-        final double[][] A = Arg.getArray();
+        final var A = Arg.getArray();
         this.n = Arg.getRowDimension();
         this.L = new double[this.n][this.n];
 
         // Is A square?
-        boolean isspd = (Arg.getColumnDimension() == this.n);
+        var isspd = (Arg.getColumnDimension() == this.n);
 
         // Main loop.
-        for (int j = 0; j < this.n; j++) {
+        for (var j = 0; j < this.n; j++) {
             // diagonal element
-            double d = A[j][j];
+            var d = A[j][j];
 
             // for k=1,...,j-1
             // L[j][k] = (A[j][k] - L[k][1]^2 - .. - L[k][k-1]^2) / L[k][k]
-            for (int k = 0; k < j; k++) {
-                double s = A[j][k];
-                for (int i = 0; i < k; i++) {
+            for (var k = 0; k < j; k++) {
+                var s = A[j][k];
+                for (var i = 0; i < k; i++) {
                     s -= this.L[k][i] * this.L[k][i];
                 }
 
@@ -167,19 +167,15 @@ public class CholeskyDecomposition implements IMatrix, Serializable {
             }
 
             // L[j][j] = sqrt(A[j][j]-L[i][1]^2-...-L[i][i-1]^2)
-            if (d <= 0D) {
+            if (d > 0D) {
+                this.L[j][j] = Math.sqrt(d);
+            } else {
                 // A is not positive definite!
                 isspd = false;
                 this.L[j][j] = 0D;
-            } else {
-                this.L[j][j] = Math.sqrt(d);
-                // L[j][j] > 0
             }
 
             // L[j][j+1] = ... = L[j][n]=0
-            for (int k = j + 1; k < this.n; k++) {
-                this.L[j][k] = 0D;
-            }
         }
         this.isspd = isspd;
     }
@@ -217,14 +213,14 @@ public class CholeskyDecomposition implements IMatrix, Serializable {
             return null;
         } else {
             // Copy right hand side.
-            final Matrix M = new Matrix(B);
-            final double[][] X = M.getArray();
-            final int nx = B.getColumnDimension();
+            final var M = new Matrix(B);
+            final var X = M.getArray();
+            final var nx = B.getColumnDimension();
 
             // Solve L*Y = B;
-            for (int k = 0; k < this.n; k++) {
-                for (int j = 0; j < nx; j++) {
-                    for (int i = 0; i < k; i++) {
+            for (var k = 0; k < this.n; k++) {
+                for (var j = 0; j < nx; j++) {
+                    for (var i = 0; i < k; i++) {
                         X[k][j] -= X[i][j] * this.L[k][i];
                     }
                     X[k][j] /= this.L[k][k];
@@ -232,8 +228,8 @@ public class CholeskyDecomposition implements IMatrix, Serializable {
             }
 
             // Solve L'*X = Y;
-            for (int k = this.n - 1; k >= 0; k--) {
-                for (int j = 0; j < nx; j++) {
+            for (var k = this.n - 1; k >= 0; k--) {
+                for (var j = 0; j < nx; j++) {
                     for (int i = k + 1; i < this.n; i++) {
                         X[k][j] -= X[i][j] * this.L[i][k];
                     }

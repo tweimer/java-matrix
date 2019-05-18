@@ -166,14 +166,13 @@ public class EigenvalueDecomposition implements Serializable {
      * @return D
      */
     public Matrix getD() {
-        final Matrix X = new Matrix(this.n, this.n);
-        final double[][] D = X.getArray();
+        final var X = new Matrix(this.n, this.n);
         for (int i = 0; i < this.n; i++) {
-            D[i][i] = this.d[i];
+            X.set(i, i, d[i]);
             if (this.e[i] > 0) {
-                D[i][i + 1] = this.e[i];
+                X.set(i, i + 1, e[i]);
             } else if (this.e[i] < 0) {
-                D[i][i - 1] = this.e[i];
+                X.set(i, i - 1, e[i]);
             }
         }
         return X;
