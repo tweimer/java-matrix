@@ -73,7 +73,7 @@ import static java.lang.Math.abs;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class Matrix implements IMatrix, Cloneable, Serializable {
+public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
     
     /**
      * For the Serializeable interface.
@@ -145,7 +145,11 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      */
     public static Matrix identity(final int m, final int n) {
         final var I = new Matrix(m, n);
-        I.identity();
+        for (var i = 0; i < I.A.length; i++) {
+            for (var j = 0; j < I.A[i].length; j++) {
+                I.A[i][j] = i == j ? 1D : 0D;
+            }
+        }
         return I;
     }
 
@@ -430,9 +434,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
     * @param matrix
     *            A lambda expression that describes the given Matrix.
     *            It must return valid numbers within the given number of rows and columns.
-    *            Any {@link RuntimeException} in {@link IMatrix#get(int, int)} is thrown back to the caller.
+    *            Any {@link RuntimeException} in {@link FunctionalMatrix#get(int, int)} is thrown back to the caller.
     */
-    public Matrix(final int m, final int n, IMatrix matrix) {
+    public Matrix(final int m, final int n, FunctionalMatrix matrix) {
         this(m, n);
         for (var i = 0; i < this.A.length; i++) {
             for (var j = 0; j < this.A[i].length; j++) {
@@ -451,10 +455,10 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      * @param matrix
      *            A lambda expression that describes the given Matrix.
      *            It must return valid numbers within the given number of rows and columns.
-     *            Any {@link RuntimeException} in {@link IMatrix#get(int, int)} is thrown back to the caller.
+     *            Any {@link RuntimeException} in {@link FunctionalMatrix#get(int, int)} is thrown back to the caller.
      * @param f This is applied after parameter matrix is evaluated.
      */
-     public Matrix(final int m, final int n, IMatrix matrix, DoubleUnaryOperator f) {
+     public Matrix(final int m, final int n, FunctionalMatrix matrix, DoubleUnaryOperator f) {
          this(m, n);
          for (var i = 0; i < this.A.length; i++) {
              for (var j = 0; j < this.A[i].length; j++) {
@@ -842,9 +846,9 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
         final var m1 = r1 - r0 + 1;
         final var n1 = c1 - c0 + 1;
         final var M = new Matrix(m1, n1);
-        for (var i = r0; i <= r1; i++) {
-            for (var j = c0; j <= c1; j++) {
-                M.A[i - r0][j - c0] = this.A[i][j];
+        for (var r = r0; r <= r1; r++) {
+            for (var c = c0; c <= c1; c++) {
+                M.A[r - r0][c - c0] = this.A[r][c];
             }
         }
         return M;
@@ -864,11 +868,12 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *                Submatrix indices
      */
     public Matrix getMatrix(final int r[], final int c0, final int c1) {
-        final int m1 = r.length, n1 = c1 - c0 + 1;
-        final Matrix M = new Matrix(m1, n1);
+        final var m1 = r.length;
+        final var n1 = c1 - c0 + 1;
+        final var M = new Matrix(m1, n1);
         for (int i = 0; i < m1; i++) {
-            for (int j = c0; j <= c1; j++) {
-                M.A[i][j - c0] = this.A[r[i]][j];
+            for (int c = c0; c <= c1; c++) {
+                M.A[i][c - c0] = this.A[r[i]][c];
             }
         }
         return M;
@@ -915,16 +920,6 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
         return Arrays.deepHashCode(this.A);
     }
 
-    /**
-     * Makes the identity matrix.
-     */
-    public void identity() {
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                this.A[i][j] = i == j ? 1D : 0D;
-            }
-        }
-    }
 
     /**
      * Matrix inverse or pseudoinverse.
@@ -1522,11 +1517,11 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *             iff operator == null
      * @see #transformEquals(Matrix, DoubleBinaryOperator)
      */
-    public Matrix transform(final Matrix B, final DoubleBinaryOperator operator) {
+    public Matrix transform(final FunctionalMatrix B, final DoubleBinaryOperator operator) {
         final var M = new Matrix(this.m, this.n);
         for (var i = 0; i < this.m; i++) {
             for (var j = 0; j < this.n; j++) {
-                M.A[i][j] = operator.applyAsDouble(this.A[i][j], B.A[i][j]);
+                M.A[i][j] = operator.applyAsDouble(this.get(i, j), B.get(i, j));
             }
         }
         return M;
@@ -1543,10 +1538,10 @@ public class Matrix implements IMatrix, Cloneable, Serializable {
      *             iff operator == null or B == null
      * @see #transform(Matrix, DoubleBinaryOperator)
      */
-    public void transformEquals(final Matrix B, final DoubleBinaryOperator operator) {
+    public void transformEquals(final FunctionalMatrix B, final DoubleBinaryOperator operator) {
         for (var i = 0; i < this.m; i++) {
             for (var j = 0; j < this.n; j++) {
-                this.A[i][j] = operator.applyAsDouble(this.A[i][j], B.A[i][j]);
+                this.A[i][j] = operator.applyAsDouble(this.get(i, j), B.get(i, j));
             }
         }
     }

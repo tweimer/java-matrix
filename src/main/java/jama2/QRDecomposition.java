@@ -20,7 +20,7 @@ import java.io.Serializable;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class QRDecomposition implements ISolver, IMatrix, Serializable {
+public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable {
     /**
      * For the Serializable interface.
      */
@@ -61,101 +61,102 @@ public class QRDecomposition implements ISolver, IMatrix, Serializable {
      */
     QRDecomposition(final Matrix A) {
         // Initialize.
-        this.QR = A.getArrayCopy();
-        this.m = A.getRowDimension();
-        this.n = A.getColumnDimension();
-        this.Rdiag = new double[this.n];
+        QR = A.getArrayCopy();
+        m = A.getRowDimension();
+        n = A.getColumnDimension();
+        Rdiag = new double[n];
 
         // Main loop.
-        for (int k = 0; k < this.n; k++) {
+        for (var k = 0; k < n; k++) {
             // Compute 2-norm of k-th column without under/overflow.
-            var nrm = 0D;
-            for (var i = k; i < this.m; i++) {
+            var nrm = 0.0;
+            for (var i = k; i < m; i++) {
                 nrm = Maths.hypot(nrm, this.QR[i][k]);
             }
 
             if (nrm != 0D) {
                 // Form k-th Householder vector.
-                if (this.QR[k][k] < 0D) {
+                if (QR[k][k] < 0.0) {
                     nrm = -nrm;
                 }
-                for (int i = k; i < this.m; i++) {
-                    this.QR[i][k] /= nrm;
+                for (var i = k; i < m; i++) {
+                    QR[i][k] /= nrm;
                 }
-                this.QR[k][k]++;
+                QR[k][k]++;
 
                 // Apply transformation to remaining columns.
-                for (int j = k + 1; j < this.n; j++) {
-                    var s = 0D;
-                    for (var i = k; i < this.m; i++) {
-                        s += this.QR[i][k] * this.QR[i][j];
+                for (var j = k + 1; j < n; j++) {
+                    var s = 0.0;
+                    for (var i = k; i < m; i++) {
+                        s += QR[i][k] * QR[i][j];
                     }
-                    s /= -this.QR[k][k];
-                    for (var i = k; i < this.m; i++) {
-                        this.QR[i][j] += s * this.QR[i][k];
+                    s /= -QR[k][k];
+                    for (var i = k; i < m; i++) {
+                        QR[i][j] += s * QR[i][k];
                     }
                 }
             }
-            this.Rdiag[k] = -nrm;
+            Rdiag[k] = -nrm;
         }
     }
 
     /**
      * Return the Householder vectors
      *
-     * @return Lower trapezoidal matrix whose columns define the reflections
+     * @return m &times; n lower trapezoidal matrix
+     * whose columns define the reflections
      */
     public Matrix getH() {
-        final var H = new double[this.m][this.n];
-        for (var i = 0; i < this.m; i++) {
+        final var H = new double[m][n];
+        for (var i = 0; i < m; i++) {
             for (var j = 0; j <= i; j++) {
-                H[i][j] = this.QR[i][j];
+                H[i][j] = QR[i][j];
             }
         }
-        return new Matrix(this.m, this.n, H);
+        return new Matrix(m, n, H);
     }
 
     /**
      * Generate and return the (economy-sized) orthogonal factor
      *
-     * @return Q
+     * @return m &times; n (economy-sized) orthogonal factor Q
      */
     public Matrix getQ() {
-        final var Q = new double[this.m][this.n];
-        for (int k = this.n - 1; k >= 0; k--) {
-            for (int i = 0; i < this.m; i++) {
+        final var Q = new double[m][n];
+        for (var k = n - 1; k >= 0; k--) {
+            for (var i = 0; i < m; i++) {
                 Q[i][k] = 0D;
             }
             Q[k][k] = 1D;
-            for (int j = k; j < this.n; j++) {
-                if (this.QR[k][k] != 0) {
+            for (var j = k; j < n; j++) {
+                if (QR[k][k] != 0) {
                     var s = 0D;
-                    for (int i = k; i < this.m; i++) {
-                        s += this.QR[i][k] * Q[i][j];
+                    for (var i = k; i < m; i++) {
+                        s += QR[i][k] * Q[i][j];
                     }
-                    s /= -this.QR[k][k];
-                    for (int i = k; i < this.m; i++) {
-                        Q[i][j] += s * this.QR[i][k];
+                    s /= -QR[k][k];
+                    for (var i = k; i < m; i++) {
+                        Q[i][j] += s * QR[i][k];
                     }
                 }
             }
         }
-        return new Matrix(this.m, this.n, Q);
+        return new Matrix(m, n, Q);
     }
 
     /**
      * Return the upper triangular factor
      *
-     * @return R
+     * @return n &times; n upper triangular factor R
      */
     public Matrix getR() {
-        final var R = new double[this.n][this.n];
-        for (var i = 0; i < this.n; i++) {
-            for (var j = i; j < this.n; j++) {
-                R[i][j] = ((i < j) ? this.QR[i][j] : this.Rdiag[i]);
+        final var R = new double[n][n];
+        for (var i = 0; i < n; i++) {
+            for (var j = i; j < n; j++) {
+                R[i][j] = ((i < j) ? QR[i][j] : Rdiag[i]);
             }
         }
-        return new Matrix(this.n, R);
+        return new Matrix(n, R);
     }
 
     /**

@@ -64,74 +64,77 @@ public class SingularValueDecomposition implements Serializable {
 
     /**
      * Construct the singular value decomposition Structure to access U, S and V.
-     * 
-     * <p>This is a package-private constructor.
-     * Use {@link Matrix#svd()} to create a cholesky decomposition of a given matrix.</p>
      *
-     * @param Arg
-     *            Rectangular matrix
+     * <p>
+     * This is a package-private constructor. Use {@link Matrix#svd()} to create a
+     * cholesky decomposition of a given matrix.
+     * </p>
+     *
+     * @param Arg Rectangular matrix
      * @see Matrix#svd()
      */
     SingularValueDecomposition(final Matrix Arg) {
         // Derived from LINPACK code.
         // Initialize.
         final var A = Arg.getArrayCopy();
-        this.m = Arg.getRowDimension();
-        this.n = Arg.getColumnDimension();
-        final int nu = min(this.m, this.n);
+        m = Arg.getRowDimension();
+        n = Arg.getColumnDimension();
+        final var nu = min(m, n);
 
         /*
-         * Apparently the failing cases are only a proper subset of (m<n), so
-         * let's not throw error. Correct fix to come later?
+         * Apparently the failing cases are only a proper subset of (m<n), so let's not
+         * throw error. Correct fix to come later?
          */
         // if (m<n)
         // {
         // throw new IllegalArgumentException("Jama SVD only works for m >= n");
         // }
 
-        this.s = new double[min(this.m + 1, this.n)];
-        this.U = new double[this.m][nu];
-        this.V = new double[this.n][this.n];
-        final double[] e = new double[this.n], work = new double[this.m];
-        final boolean wantu = true, wantv = true;
+        s = new double[min(m + 1, n)];
+        U = new double[m][nu];
+        V = new double[n][n];
+        final var e = new double[n];
+        final var work = new double[m];
+        final var wantu = true;
+        final var wantv = true;
 
         // Reduce A to bidiagonal form, storing the diagonal elements
         // in s and the super-diagonal elements in e.
-        final int nct = min(this.m - 1, this.n),
-                nrt = max(0, min(this.n - 2, this.m));
-        for (int k = 0; k < max(nct, nrt); k++) {
+        final var nct = min(m - 1, n);
+        final var nrt = max(0, min(n - 2, m));
+        for (var k = 0; k < max(nct, nrt); k++) {
             if (k < nct) {
                 // Compute 2-norm of k-th column without under/overflow.
-                this.s[k] = 0;
-                for (int i = k; i < this.m; i++) {
-                    this.s[k] = hypot(this.s[k], A[i][k]);
+                s[k] = 0.0;
+                for (var i = k; i < m; i++) {
+                    s[k] = hypot(s[k], A[i][k]);
                 }
 
                 // Compute the transformation for the k-th column
-                if (this.s[k] != 0D) {
-                    if (A[k][k] < 0D) {
-                        this.s[k] = -this.s[k];
+                if (s[k] != 0.0) {
+                    if (A[k][k] < 0.0) {
+                        s[k] = -s[k];
                     }
-                    for (int i = k; i < this.m; i++) {
-                        A[i][k] /= this.s[k];
+                    for (int i = k; i < m; i++) {
+                        A[i][k] /= s[k];
                     }
                     A[k][k]++;
                 }
 
                 // place the k-th diagonal in s[k].
-                this.s[k] = -this.s[k];
+                s[k] = -s[k];
             }
 
-            for (int j = k + 1; j < this.n; j++) {
-                if ((k < nct) && (this.s[k] != 0D)) {
+            for (int j = k + 1; j < n; j++) {
+                if (k < nct && s[k] != 0.0) {
                     // Apply the transformation.
-                    var t = 0D;
-                    for (int i = k; i < this.m; i++) {
+                    var t = 0.0;
+                    for (var i = k; i < m; i++) {
                         t += A[i][k] * A[i][j];
                     }
                     t /= -A[k][k];
 
-                    for (int i = k; i < this.m; i++) {
+                    for (var i = k; i < m; i++) {
                         A[i][j] += t * A[i][k];
                     }
                 }
@@ -141,11 +144,10 @@ public class SingularValueDecomposition implements Serializable {
                 e[j] = A[k][j];
             }
 
-            if (wantu && (k < nct)) {
-                // Place the transformation in U for subsequent back
-                // multiplication.
-                for (var i = k; i < this.m; i++) {
-                    this.U[i][k] = A[i][k];
+            if (wantu && k < nct) {
+                // Place the transformation in U for subsequent back multiplication.
+                for (var i = k; i < m; i++) {
+                    U[i][k] = A[i][k];
                 }
             }
 
@@ -153,139 +155,140 @@ public class SingularValueDecomposition implements Serializable {
                 // Compute the k-th row transformation and place the
                 // k-th super-diagonal in e[k].
                 // Compute 2-norm without under/overflow.
-                e[k] = 0D;
-                for (var i = k + 1; i < this.n; i++) {
+                e[k] = 0.0;
+                for (var i = k + 1; i < n; i++) {
                     e[k] = hypot(e[k], e[i]);
                 }
 
-                if (e[k] != 0D) {
-                    if (e[k + 1] < 0D) {
+                if (e[k] != 0.0) {
+                    if (e[k + 1] < 0.0) {
                         e[k] = -e[k];
                     }
-                    for (var i = k + 1; i < this.n; i++) {
+                    for (var i = k + 1; i < n; i++) {
                         e[i] /= e[k];
                     }
                     e[k + 1]++;
                 }
                 e[k] = -e[k];
 
-                if ((k + 1 < this.m) && (e[k] != 0.0)) {
+                if (k + 1 < m && e[k] != 0.0) {
                     // Apply the transformation.
-                    for (var i = k + 1; i < this.m; i++) {
-                        work[i] = 0D;
+                    for (var i = k + 1; i < m; i++) {
+                        work[i] = 0.0;
                     }
-                    for (var j = k + 1; j < this.n; j++) {
-                        for (var i = k + 1; i < this.m; i++) {
-                            work[i] += (e[j] * A[i][j]);
+                    for (var j = k + 1; j < n; j++) {
+                        for (var i = k + 1; i < m; i++) {
+                            work[i] += e[j] * A[i][j];
                         }
                     }
-                    for (var j = k + 1; j < this.n; j++) {
+                    for (var j = k + 1; j < n; j++) {
                         final var t = -e[j] / e[k + 1];
-                        for (var i = k + 1; i < this.m; i++) {
-                            A[i][j] += (t * work[i]);
+                        for (var i = k + 1; i < m; i++) {
+                            A[i][j] += t * work[i];
                         }
                     }
                 }
 
                 if (wantv) {
-                    // Place the transformation in V for subsequent back
-                    // multiplication.
-                    for (var i = k + 1; i < this.n; i++) {
-                        this.V[i][k] = e[i];
+                    // Place the transformation in V for subsequent back multiplication.
+                    for (var i = k + 1; i < n; i++) {
+                        V[i][k] = e[i];
                     }
                 }
             }
         }
 
         // Set up the final bidiagonal matrix or order p.
-        var p = min(this.n, this.m + 1);
-        if (nct < this.n) {
-            this.s[nct] = A[nct][nct];
+        var p = min(n, m + 1);
+        if (nct < n) {
+            s[nct] = A[nct][nct];
         }
 
-        if (this.m < p) {
-            this.s[p - 1] = 0D;
+        if (m < p) {
+            s[p - 1] = 0.0;
         }
 
         if (nrt + 1 < p) {
             e[nrt] = A[nrt][p - 1];
         }
 
-        e[p - 1] = 0D;
+        e[p - 1] = 0.0;
 
         // If required, generate U.
         if (wantu) {
-            for (int j = nct; j < nu; j++) {
-                for (final var rowU : this.U) {
-                    rowU[j] = 0D;
+            for (var j = nct; j < nu; j++) {
+                for (final var rowU : U) {
+                    rowU[j] = 0.0;
                 }
-                this.U[j][j] = 1D;
+                U[j][j] = 1.0;
             }
 
             for (int k = nct - 1; k >= 0; k--) {
-                if (this.s[k] != 0D) {
+                if (s[k] != 0.0) {
                     for (int j = k + 1; j < nu; j++) {
-                        var t = 0D;
-                        for (int i = k; i < this.m; i++) {
-                            t += this.U[i][k] * this.U[i][j];
+                        var t = 0.0;
+                        for (var i = k; i < m; i++) {
+                            t += U[i][k] * U[i][j];
                         }
-                        t /= -this.U[k][k];
+                        t /= -U[k][k];
 
-                        for (int i = k; i < this.m; i++) {
-                            this.U[i][j] += t * this.U[i][k];
+                        for (var i = k; i < m; i++) {
+                            U[i][j] += t * U[i][k];
                         }
                     }
-                    for (int i = k; i < this.m; i++) {
-                        this.U[i][k] = -this.U[i][k];
+                    for (var i = k; i < m; i++) {
+                        U[i][k] = -U[i][k];
                     }
-                    this.U[k][k]++;
+                    U[k][k]++;
 
-                    for (var i = 0; i < (k - 1); i++) {
-                        this.U[i][k] = 0D;
+                    for (var i = 0; i < k - 1; i++) {
+                        U[i][k] = 0.0;
                     }
                 } else {
-                    for (final var rowU : this.U) {
-                        rowU[k] = 0D;
+                    for (final var rowU : U) {
+                        rowU[k] = 0.0;
                     }
-                    this.U[k][k] = 1D;
+                    U[k][k] = 1.0;
                 }
             }
         }
 
         // If required, generate V.
         if (wantv) {
-            for (int k = this.n - 1; k >= 0; k--) {
-                if ((k < nrt) && (e[k] != 0D)) {
+            for (int k = n - 1; k >= 0; k--) {
+                if (k < nrt && e[k] != 0.0) {
                     for (int j = k + 1; j < nu; j++) {
-                        var t = 0;
-                        for (var i = k + 1; i < this.n; i++) {
-                            t += this.V[i][k] * this.V[i][j];
+                        var t = 0.0;
+                        for (var i = k + 1; i < n; i++) {
+                            t += V[i][k] * V[i][j];
                         }
-                        t /= -this.V[k + 1][k];
+                        t /= -V[k + 1][k];
 
-                        for (var i = k + 1; i < this.n; i++) {
-                            this.V[i][j] += t * this.V[i][k];
+                        for (var i = k + 1; i < n; i++) {
+                            V[i][j] += t * V[i][k];
                         }
                     }
                 }
-                for (final double[] rowV : this.V) {
-                    rowV[k] = 0D;
+                for (final double[] rowV : V) {
+                    rowV[k] = 0.0;
                 }
-                this.V[k][k] = 1D;
+                V[k][k] = 1.0;
             }
         }
 
         // Main iteration loop for the singular values.
         final var pp = p - 1;
         while (p > 0) {
-            int k = p - 2;
-            for (; k >= -1; k--) {
+            var k = p - 2;
+            while (k >= -1) {
                 if (k == -1) {
                     break;
-                } else if (abs(e[k]) <= (tiny + (eps * (abs(this.s[k]) + abs(this.s[k + 1]))))) {
-                    e[k] = 0D;
+                }
+                if (abs(e[k]) <= tiny + eps * (abs(s[k]) + abs(s[k + 1]))) {
+                    e[k] = 0.0;
                     break;
                 }
+                k--;
             }
 
             // Here is where a test for too many iterations would go.
@@ -301,26 +304,31 @@ public class SingularValueDecomposition implements Serializable {
             // not negligible (qr step).
             // kase = 4 if e(p-1) is negligible (convergence).
             final byte kase;
-            if (k == (p - 2)) {
+            if (k == p - 2) {
                 // e(p-1) is negligible (convergence).
                 kase = 4;
             } else {
-                int ks = p - 1;
-                while (ks > k) {
-                    final double t = (ks != p ? abs(e[ks]) : 0D) + (ks != (k + 1) ? abs(e[ks - 1]) : 0D);
-                    if (abs(this.s[ks]) <= (tiny + (eps * t))) {
-                        this.s[ks] = 0D;
+                var ks = p - 1;
+                while (ks >= k) {
+                    if (ks == k) {
                         break;
-                    } else {
-                        ks--;
                     }
+                    
+                    final var t = (ks != p ? abs(e[ks]) : 0.0) +
+                            (ks != k + 1 ? abs(e[ks - 1]) : 0.0);
+                    if (abs(s[ks]) <= tiny + eps * t) {
+                        s[ks] = 0.0;
+                        break;
+                    }
+                    
+                    ks--;
                 }
 
                 if (ks == k) {
                     // e[k-1] is negligible, k<p, and s(k), ..., s(p) are not
                     // negligible (qr step).
                     kase = 3;
-                } else if (ks == (p - 1)) {
+                } else if (ks == p - 1) {
                     // s(p) and e[k-1] are negligible and k<p
                     kase = 1;
                 } else {
@@ -333,28 +341,29 @@ public class SingularValueDecomposition implements Serializable {
 
             // Perform the task indicated by kase.
             switch (kase) {
+            
             // Deflate negligible s(p).
             case 1: {
                 // Remember e[p - 2] in f and reset it
-                double f = e[p - 2];
-                e[p - 2] = 0D;
+                var f = e[p - 2];
+                e[p - 2] = 0.0;
 
-                for (int j = p - 2; j >= k; j--) {
-                    double t = hypot(this.s[j], f);
-                    final double cs = (this.s[j] / t), sn = (f / t);
-                    this.s[j] = t;
+                for (var j = p - 2; j >= k; j--) {
+                    final var h = hypot(s[j], f);
+                    final var cs = s[j] / h;
+                    final var sn = f / h;
+                    s[j] = h;
                     if (j != k) {
                         f = -sn * e[j - 1];
                         e[j - 1] *= cs;
                     }
 
                     if (wantv) {
-                        for (final double rowV[] : this.V) {
-                            // remember V[i][p - 1]
-                            t = rowV[p - 1];
-                            rowV[p - 1] = (cs * t) - (sn * rowV[j]);
-                            rowV[j] = (cs * rowV[j]) + (sn * t);
-                        }
+                        for (var i = 0; i < n; i++) {
+                            final var t = cs*V[i][j] + sn*V[i][p-1];
+                            V[i][p-1] = -sn*V[i][j] + cs*V[i][p-1];
+                            V[i][j] = t;
+                         }
                     }
                 }
             }
@@ -364,21 +373,21 @@ public class SingularValueDecomposition implements Serializable {
             case 2: {
                 // Remember e[k - 1] in f and reset it
                 double f = e[k - 1];
-                e[k - 1] = 0D;
+                e[k - 1] = 0.0;
 
                 for (int j = k; j < p; j++) {
-                    var t = hypot(this.s[j], f);
-                    final double cs = (this.s[j] / t), sn = (f / t);
-                    this.s[j] = t;
+                    var t = hypot(s[j], f);
+                    final double cs = s[j] / t, sn = f / t;
+                    s[j] = t;
                     f = -sn * e[j];
                     e[j] *= cs;
 
                     if (wantu) {
-                        for (final double[] rowU : this.U) {
+                        for (final var rowU : U) {
                             // Update U[i][k - 1] and U[i][j]
                             t = rowU[k - 1]; // remember U[i][k - 1]
-                            rowU[k - 1] = (cs * t) - (sn * rowU[j]);
-                            rowU[j] = (cs * rowU[j]) + (sn * t);
+                            rowU[k - 1] = cs * t - sn * rowU[j];
+                            rowU[j] = cs * rowU[j] + sn * t;
                         }
                     }
                 }
@@ -387,64 +396,67 @@ public class SingularValueDecomposition implements Serializable {
 
             // Perform one qr step.
             case 3: {
-                final double scale = max(
-                        max(max(max(abs(this.s[p - 1]),
-                                abs(this.s[p - 2])), abs(e[p - 2])), abs(this.s[k])),
-                                    abs(e[k]));
-                final double sp = this.s[p - 1] / scale;
-                final double spm1 = this.s[p - 2] / scale,
-                        epm1 = e[p - 2] / scale;
-                final double sk = this.s[k] / scale, ek = e[k] / scale;
-                final double b = (((spm1 + sp) * (spm1 - sp)) + (epm1 * epm1)) / 2.0,
-                        c = (sp * epm1) * (sp * epm1);
+                final var scale = max(
+                        max(max(max(abs(s[p - 1]), abs(s[p - 2])), abs(e[p - 2])), abs(s[k])),
+                        abs(e[k]));
+                final var sp = s[p - 1] / scale;
+                final var spm1 = s[p - 2] / scale;
+                final var epm1 = e[p - 2] / scale;
+                final var sk = s[k] / scale;
+                final var ek = e[k] / scale;
+                final var b = ((spm1 + sp) * (spm1 - sp) + epm1 * epm1) / 2.0;
+                final var c = (sp * epm1) * (sp * epm1);
 
                 // Calculate the shift.
                 double shift;
-                if ((b != 0D) || (c != 0D)) {
-                    shift = sqrt((b * b) + c);
-                    if (b < 0D) {
+                if (b != 0.0 || c != 0.0) {
+                    shift = sqrt(b * b + c);
+                    if (b < 0.0) {
                         shift = -shift;
                     }
                     shift = c / (b + shift);
                 } else {
-                    shift = 0D;
+                    shift = 0.0;
                 }
 
                 // Chase zeros.
-                double f = (((sk + sp) * (sk - sp)) + shift), g = (sk * ek);
-                for (int j = k; j < (p - 1); j++) {
-                    double t = hypot(f, g), cs = f / t, sn = g / t;
+                var f = (sk + sp) * (sk - sp) + shift;
+                var g = sk * ek;
+                for (var j = k; j < p - 1; j++) {
+                    var h = hypot(f, g);
+                    var cs = f / h;
+                    var sn = g / h;
                     if (j != k) {
-                        e[j - 1] = t;
+                        e[j - 1] = h;
                     }
-                    f = (cs * this.s[j]) + (sn * e[j]);
-                    e[j] = (cs * e[j]) - (sn * this.s[j]);
-                    g = sn * this.s[j + 1];
-                    this.s[j + 1] *= cs;
+                    f = cs * s[j] + sn * e[j];
+                    e[j] = cs * e[j] - sn * s[j];
+                    g = sn * s[j + 1];
+                    s[j + 1] *= cs;
 
                     if (wantv) {
-                        for (final double[] rowV : this.V) {
-                            t = rowV[j + 1]; // remember V[i][j + 1]
-                            rowV[j + 1] = (cs * t) - (sn * rowV[j]);
-                            rowV[j] = (cs * rowV[j]) + (sn * t);
+                        for (var i = 0; i < n; i++) {
+                            final var t = cs*V[i][j] + sn*V[i][j+1];
+                            V[i][j+1] = -sn*V[i][j] + cs*V[i][j+1];
+                            V[i][j] = t;
                         }
                     }
 
-                    t = hypot(f, g);
-                    cs = f / t;
-                    sn = g / t;
-                    this.s[j] = t;
-                    f = ((cs * e[j]) + (sn * this.s[j + 1]));
-                    this.s[j + 1] = ((cs * this.s[j + 1]) - (sn * e[j]));
+                    h = hypot(f, g);
+                    cs = f / h;
+                    sn = g / h;
+                    s[j] = h;
+                    f = cs * e[j] + sn * s[j + 1];
+                    s[j + 1] = cs * s[j + 1] - sn * e[j];
                     g = sn * e[j + 1];
                     e[j + 1] *= cs;
 
-                    if (wantu && (j < (this.m - 1))) {
-                        for (final double[] rowU : this.U) {
-                            t = rowU[j + 1];
-                            rowU[j + 1] = ((cs * t) - (sn * rowU[j]));
-                            rowU[j] = ((cs * rowU[j]) + (sn * t));
-                        }
+                    if (wantu && j < m - 1) {
+                        for (var  i = 0; i < m; i++) {
+                            final var t = cs*U[i][j] + sn*U[i][j+1];
+                            U[i][j+1] = -sn*U[i][j] + cs*U[i][j+1];
+                            U[i][j] = t;
+                         }
                     }
                 }
                 e[p - 2] = f;
@@ -454,25 +466,25 @@ public class SingularValueDecomposition implements Serializable {
             // Convergence.
             case 4: {
                 // Make the singular values positive.
-                if (this.s[k] <= 0D) {
-                    this.s[k] = -this.s[k];
+                if (s[k] <= 0.0) {
+                    s[k] = -s[k];
                     if (wantv) {
-                        for (int i = 0; i <= pp; i++) {
-                            this.V[i][k] = -this.V[i][k];
+                        for (var i = 0; i <= pp; i++) {
+                            V[i][k] = -V[i][k];
                         }
                     }
                 }
 
                 // Order the singular values.
                 while (k < pp) {
-                    if (this.s[k] < this.s[k + 1]) {
+                    if (s[k] < s[k + 1]) {
                         // swap s[k] and s[k + 1]
-                        double t = this.s[k];
-                        this.s[k] = this.s[k + 1];
-                        this.s[k + 1] = t;
+                        double t = s[k];
+                        s[k] = s[k + 1];
+                        s[k + 1] = t;
 
-                        if (wantv && (k < (this.n - 1))) {
-                            for (final double[] rowV : this.V) {
+                        if (wantv && k < n - 1) {
+                            for (final double[] rowV : V) {
                                 // swap rowV[k + 1] and rowV[k]
                                 t = rowV[k + 1];
                                 rowV[k + 1] = rowV[k];
@@ -480,8 +492,8 @@ public class SingularValueDecomposition implements Serializable {
                             }
                         }
 
-                        if (wantu && (k < (this.m - 1))) {
-                            for (final double[] rowU : this.U) {
+                        if (wantu && k < m - 1) {
+                            for (final double[] rowU : U) {
                                 // swap rowU[k + 1] and rowU[k]
                                 t = rowU[k + 1];
                                 rowU[k + 1] = rowU[k];
@@ -506,7 +518,7 @@ public class SingularValueDecomposition implements Serializable {
      * @return max(S)/min(S)
      */
     public double cond() {
-        return this.s[0] / this.s[min(this.m, this.n) - 1];
+        return s[0] / s[min(m, n) - 1];
     }
 
     /**
@@ -524,7 +536,7 @@ public class SingularValueDecomposition implements Serializable {
      * @return diagonal of S.
      */
     public double[] getSingularValues() {
-        return this.s;
+        return s;
     }
 
     /**
@@ -533,7 +545,7 @@ public class SingularValueDecomposition implements Serializable {
      * @return U
      */
     public Matrix getU() {
-        return new Matrix(this.m, min(this.m, this.n), this.U);
+        return new Matrix(m, min(m, n), U);
     }
 
     /**
@@ -542,7 +554,7 @@ public class SingularValueDecomposition implements Serializable {
      * @return V
      */
     public Matrix getV() {
-        return new Matrix(this.n, this.V);
+        return new Matrix(n, V);
     }
 
     /**
@@ -551,7 +563,7 @@ public class SingularValueDecomposition implements Serializable {
      * @return max(S)
      */
     public double norm2() {
-        return this.s[0];
+        return s[0];
     }
 
     /**
@@ -560,9 +572,9 @@ public class SingularValueDecomposition implements Serializable {
      * @return Number of nonnegligible singular values.
      */
     public int rank() {
-        final double tol = max(this.m, this.n) * this.s[0] * eps;
+        final double tol = max(m, n) * s[0] * eps;
         int r = 0;
-        for (final double element : this.s) {
+        for (final double element : s) {
             if (element > tol) {
                 r++;
             }

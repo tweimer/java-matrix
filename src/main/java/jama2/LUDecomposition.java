@@ -23,7 +23,7 @@ import java.util.Arrays;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class LUDecomposition implements ISolver, IMatrix, Serializable {
+public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable {
     /**
      * For the Serializeable interface
      */
@@ -72,57 +72,57 @@ public class LUDecomposition implements ISolver, IMatrix, Serializable {
      */
     LUDecomposition(final Matrix A, final boolean linpackflag) {
         // Initialize.
-        this.LU = A.getArrayCopy();
-        this.m = A.getRowDimension();
-        this.n = A.getColumnDimension();
+        LU = A.getArrayCopy();
+        m = A.getRowDimension();
+        n = A.getColumnDimension();
+        piv = new int[this.m];
         
-        this.piv = new int[this.m];
-        for (var i = 1; i < this.m; i++) {
-            this.piv[i] = i;
+        for (var i = 1; i < m; i++) {
+            piv[i] = i;
         }
         
         var pivsign = 1;
         if (linpackflag) {
             // Main loop.
-            for (var k = 0; k < this.n; k++) {
+            for (var k = 0; k < n; k++) {
                 // Find pivot.
                 var p = k;
-                for (var i = k + 1; i < this.m; i++) {
-                    if (Math.abs(this.LU[i][k]) > Math.abs(this.LU[p][k])) {
+                for (var i = k + 1; i < m; i++) {
+                    if (Math.abs(LU[i][k]) > Math.abs(LU[p][k])) {
                         p = i;
                     }
                 }
                 
                 // Exchange if necessary.
                 if (p > k) {
-                    for (var j = 0; j < this.n; j++) {
-                        final var t = this.LU[p][j];
-                        this.LU[p][j] = this.LU[k][j];
-                        this.LU[k][j] = t;
+                    for (var j = 0; j < n; j++) {
+                        final var t = LU[p][j];
+                        LU[p][j] = LU[k][j];
+                        LU[k][j] = t;
                     }
                     
                     // Swap piv[p] and piv[k]
-                    final var t = this.piv[p];
-                    this.piv[p] = this.piv[k];
-                    this.piv[k] = t;
+                    final var t = piv[p];
+                    piv[p] = piv[k];
+                    piv[k] = t;
                     
                     // alternate pivsign
                     pivsign = -pivsign;
                 }
                 
                 // Compute multipliers and eliminate k-th column.
-                if (this.LU[k][k] != 0D) {
-                    for (var i = k + 1; i < this.m; i++) {
-                        this.LU[i][k] /= this.LU[k][k];
-                        for (var j = k + 1; j < this.n; j++) {
-                            this.LU[i][j] -= this.LU[i][k] * this.LU[k][j];
+                if (LU[k][k] != 0D) {
+                    for (var i = k + 1; i < m; i++) {
+                        LU[i][k] /= LU[k][k];
+                        for (var j = k + 1; j < n; j++) {
+                            LU[i][j] -= LU[i][k] * LU[k][j];
                         }
                     }
                 }
             }
         } else {
             // Outer loop.
-            for (var j = 0; j < this.n; j++) {
+            for (var j = 0; j < n; j++) {
                 final var LUcolj = new double[this.m];
 
                 // Make a copy of the j-th column to localize references.
@@ -131,8 +131,8 @@ public class LUDecomposition implements ISolver, IMatrix, Serializable {
                 }
 
                 // Apply previous transformations.
-                for (var i = 0; i < this.m; i++) {
-                    final var LUrowi = this.LU[i];
+                for (var i = 0; i < m; i++) {
+                    final var LUrowi = LU[i];
 
                     // Most of the time is spent in the following dot product.
                     final var kmax = Math.min(i, j);
@@ -145,7 +145,7 @@ public class LUDecomposition implements ISolver, IMatrix, Serializable {
 
                 // Find pivot and exchange if necessary.
                 var p = j;
-                for (var i = j + 1; i < this.m; i++) {
+                for (var i = j + 1; i < m; i++) {
                     if (Math.abs(LUcolj[i]) > Math.abs(LUcolj[p])) {
                         p = i;
                     }
@@ -153,23 +153,23 @@ public class LUDecomposition implements ISolver, IMatrix, Serializable {
 
                 if (p > j) {
                     // Swap this.LU[p][k] and this.LU[j][k]
-                    final var row_p = this.LU[p];
-                    this.LU[p] = this.LU[j];
-                    this.LU[j] = row_p;
+                    final var row_p = LU[p];
+                    LU[p] = LU[j];
+                    LU[j] = row_p;
 
                     // swap piv[p] and piv[j]
-                    final var k = this.piv[p];
-                    this.piv[p] = this.piv[j];
-                    this.piv[j] = k;
+                    final var k = piv[p];
+                    piv[p] = piv[j];
+                    piv[j] = k;
 
                     // alternate pivsign
                     pivsign = -pivsign;
                 }
 
                 // Compute multipliers.
-                if ((j < this.m) && (this.LU[j][j] != 0D)) {
-                    for (var i = j + 1; i < this.m; i++) {
-                        this.LU[i][j] /= this.LU[j][j];
+                if ((j < m) && (LU[j][j] != 0D)) {
+                    for (var i = j + 1; i < m; i++) {
+                        LU[i][j] /= LU[j][j];
                     }
                 }
             }
@@ -199,15 +199,15 @@ public class LUDecomposition implements ISolver, IMatrix, Serializable {
      *         matrix is singular.
      */
     public double det() {
-        if (this.m == this.n) {
+        if (m == n) {
             // go through the LU decomposition
             // For A = P*L*U, det(A)=det(P)*det(L)*det(U), where
             // det(P) is pivsign
             // det(L) is equal to 1
             // det(U) is the product of the diagonal entries
             // So lets start with pivsign and multiply with the diagonal entries.
-            double det = this.pivsign;
-            for (int j = 0; j < this.n; j++) {
+            double det = pivsign;
+            for (var j = 0; j < this.n; j++) {
                 det *= this.LU[j][j];
             }
             return det;

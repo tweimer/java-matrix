@@ -19,7 +19,7 @@ import java.io.Serializable;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class CholeskyDecomposition implements IMatrix, Serializable {
+public class CholeskyDecomposition implements FunctionalMatrix, Serializable {
     /**
      * For the Serializable interface.
      */

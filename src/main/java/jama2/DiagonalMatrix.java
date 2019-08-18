@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.IntToDoubleFunction;
 
 /**
  * This class represents a diagonal matrix of a fixed square size.
@@ -11,7 +12,7 @@ import java.util.function.DoubleUnaryOperator;
  * @author Tobias Weimer
  *
  */
-public class DiagonalMatrix implements Serializable, Cloneable, IMatrix {
+public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix {
     private static final long serialVersionUID = 1L;
 
     /** array of the diagonal elements */
@@ -31,8 +32,21 @@ public class DiagonalMatrix implements Serializable, Cloneable, IMatrix {
      *
      * @param d Another diagonal Matrix
      */
-    public DiagonalMatrix(final DiagonalMatrix D) {
-        diag = Arrays.copyOf(D.diag, D.diag.length);
+    public DiagonalMatrix(final DiagonalMatrix d) {
+        diag = Arrays.copyOf(d.diag, d.diag.length);
+    }
+
+    /**
+     * Constructs a diagonal matrix and initializes it with the given function
+     *
+     * @param size Size of the matrix
+     * @param func Function to initialize the diagonal matrix, starting at 0.
+     */
+    public DiagonalMatrix(final int size, final IntToDoubleFunction func) {
+        this(size);
+        for (var i = 0; i < size; i++) {
+            set(i, func.applyAsDouble(i));
+        }
     }
     
     /**
@@ -41,6 +55,19 @@ public class DiagonalMatrix implements Serializable, Cloneable, IMatrix {
      */
     DiagonalMatrix(final double[] diag) {
         this.diag = diag;
+    }
+    
+    /**
+     * Constructs the identity Matrix
+     *
+     * @param size Size of the identity matrix
+     */
+    public static DiagonalMatrix identity(final int size) {
+        final var d = new DiagonalMatrix(size);
+        for (var i = 0; i < size; i++) {
+            d.set(i, 1D);
+        }
+        return d;
     }
 
     /**

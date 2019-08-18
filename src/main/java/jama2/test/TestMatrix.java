@@ -199,7 +199,7 @@ public class TestMatrix {
      *            unused
      */
     public static void main(final String argv[]) {
-        Matrix A, Z, M;
+        Matrix A, blablabla, M;
         // Uncomment this to test IO in a different locale.
         // Locale.setDefault(Locale.GERMAN);
         double tmp;
@@ -755,7 +755,7 @@ public class TestMatrix {
         }
 
         A.minusEquals(R);
-        Z = new Matrix(A.getRowDimension(), A.getColumnDimension());
+        blablabla = new Matrix(A.getRowDimension(), A.getColumnDimension());
         try {
             A.minusEquals(S);
             TestMatrix.try_failure("minusEquals conformance check... ", //$NON-NLS-1$
@@ -764,7 +764,7 @@ public class TestMatrix {
             TestMatrix.try_success("minusEquals conformance check... "); //$NON-NLS-1$
         }
 
-        if (A.minus(Z).norm1() != 0D) {
+        if (A.minus(blablabla).norm1() != 0D) {
             TestMatrix.try_failure("minusEquals... ", //$NON-NLS-1$
                     "(difference of identical Matrices is nonzero,\nSubsequent use of minus should be suspect)"); //$NON-NLS-1$
         } else {
@@ -819,7 +819,7 @@ public class TestMatrix {
 
         A = R.uminus();
         try {
-            TestMatrix.check(A.plus(R), Z);
+            TestMatrix.check(A.plus(R), blablabla);
             TestMatrix.try_success("uminus... "); //$NON-NLS-1$
         } catch (final RuntimeException e) {
             TestMatrix.try_failure("uminus... ", "(-A + A != zeros)"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1080,7 +1080,7 @@ public class TestMatrix {
                     "incorrect Matrix-Matrix product calculation"); //$NON-NLS-1$
         }
         try {
-            TestMatrix.check(A.times(0.), Z);
+            TestMatrix.check(A.times(0.), blablabla);
             TestMatrix.try_success("times(double)..."); //$NON-NLS-1$
         } catch (final RuntimeException e) {
             TestMatrix.try_failure("times(double)...", //$NON-NLS-1$
