@@ -1,121 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<groupId>de.java-matrix</groupId>
-	<artifactId>jama</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
-	<modelVersion>4.0.0</modelVersion>
-    <name>Java Matrix Package</name>
-    <url>https://github.com/tweimer/java-matrix</url>
-    <description>A Java Matrix Package</description>
-    <packaging>jar</packaging>
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+        <groupId>de.java-matrix</groupId>
+        <artifactId>jama</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+        <modelVersion>4.0.0</modelVersion>
+        <name>Java Matrix Package</name>
+        <url>https://github.com/tweimer/java-matrix</url>
+        <description>A Java Matrix Package</description>
+        <packaging>jar</packaging>
 
-    <properties>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+        <dependencies>
+                <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+                <dependency>
+                    <groupId>org.junit.jupiter</groupId>
+                    <artifactId>junit-jupiter-api</artifactId>
+                    <version>5.6.0-M1</version>
+                    <scope>test</scope>
+                </dependency>
+        </dependencies>
 
-	<licenses>
-		<license>
-			<name>Unlicense</name>
-			<url>http://unlicense.org/UNLICENSE</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+        <properties>
+                <maven.compiler.source>11</maven.compiler.source>
+                <maven.compiler.target>11</maven.compiler.target>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        </properties>
 
-	<build>
-        <plugins>
+        <licenses>
+                <license>
+                        <name>Unlicense</name>
+                        <url>http://unlicense.org/UNLICENSE</url>
+                        <distribution>repo</distribution>
+                </license>
+        </licenses>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.7</version>
-            </plugin>
-        </plugins>
-    </build>
+        <build>
+                <plugins>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-project-info-reports-plugin</artifactId>
+                                <version>2.7</version>
+                        </plugin>
+                </plugins>
+        </build>
 
-	<scm>
-		<url>https://github.com/tweimer/java-matrix</url>
-		<connection>scm:git:git://github.com/tweimer/java-matrix.git</connection>
-		<developerConnection>scm:git:git@github.com:tweimer/java-matrix.git</developerConnection>
-	</scm>
+        <scm>
+                <url>https://github.com/tweimer/java-matrix</url>
+                <connection>scm:git:git://github.com/tweimer/java-matrix.git</connection>
+                <developerConnection>scm:git:git@github.com:tweimer/java-matrix.git</developerConnection>
+        </scm>
 
-	<issueManagement>
-		<system>Github</system>
-		<url>https://github.com/tweimer/java-matrix/issues</url>
-	</issueManagement>
+        <issueManagement>
+                <system>Github</system>
+                <url>https://github.com/tweimer/java-matrix/issues</url>
+        </issueManagement>
 
 
-	<mailingLists>
-		<mailingList>
-			<name>Jama User List</name>
-			<subscribe>listproc@nist.gov</subscribe>
-			<unsubscribe>listproc@nist.gov</unsubscribe>
-			<post>jama@nist.gov</post>
-			<archive>http://cio.nist.gov/esd/emaildir/lists/jama/maillist.html</archive>
-		</mailingList>
-	</mailingLists>
+        <mailingLists>
+                <mailingList>
+                        <name>Jama User List</name>
+                        <subscribe>listproc@nist.gov</subscribe>
+                        <unsubscribe>listproc@nist.gov</unsubscribe>
+                        <post>jama@nist.gov</post>
+                        <archive>http://cio.nist.gov/esd/emaildir/lists/jama/maillist.html</archive>
+                </mailingList>
+        </mailingLists>
 
-	<developers>
-		<developer>
-			<id>jHicklin</id>
-			<name>Joe Hicklin</name>
-			<email />
-            <organization>The MathWorks</organization>
-            <organizationUrl>https://www.mathworks.com/</organizationUrl>
-		</developer>
-		<developer>
-			<id>cmoler</id>
-			<name>Cleve Moler</name>
-			<email />
-            <organization>The MathWorks</organization>
-            <organizationUrl>https://www.mathworks.com/</organizationUrl>
-		</developer>
-		<developer>
-			<id>pwebb</id>
-			<name>Peter Webb</name>
-			<email />
-            <organization>The MathWorks</organization>
-            <organizationUrl>https://www.mathworks.com/</organizationUrl>
-		</developer>
-		<developer>
-			<id>rboisvert</id>
-			<name>Ronald F. Boisvert </name>
-			<email>boisvert@nist.gov</email>
-            <organization>NIST</organization>
-            <organizationUrl>https://www.nist.gov</organizationUrl>
-		</developer>
-		<developer>
-			<id>bmiller</id>
-			<name>Bruce Miller </name>
-			<email>bruce.miller@nist.gov</email>
-            <organization>NIST</organization>
-            <organizationUrl>https://www.nist.gov</organizationUrl>
-		</developer>
-		<developer>
-			<id>rpozo</id>
-			<name>Roldan Pozo</name>
-			<email>pozo@nist.gov</email>
-            <organization>NIST</organization>
-            <organizationUrl>https://www.nist.gov</organizationUrl>
-		</developer>
-		<developer>
-			<id>kremington</id>
-			<name>Dr. Karin A. Remington</name>
-			<email>kremington@nist.gov</email>
-            <organization>NIST</organization>
-            <organizationUrl>https://www.nist.gov</organizationUrl>
-		</developer>
-		<developer>
-			<id>tweimer</id>
-			<name>Tobias Weimer</name>
-			<email>wishmaster51@gmail.com</email>
-		</developer>
-	</developers>
+        <developers>
+                <developer>
+	                <id>jHicklin</id>
+	                <name>Joe Hicklin</name>
+	                <email />
+                        <organization>The MathWorks</organization>
+                        <organizationUrl>https://www.mathworks.com/</organizationUrl>
+                </developer>
+                <developer>
+	                <id>cmoler</id>
+	                <name>Cleve Moler</name>
+	                <email />
+                        <organization>The MathWorks</organization>
+                        <organizationUrl>https://www.mathworks.com/</organizationUrl>
+                </developer>
+                <developer>
+	                <id>pwebb</id>
+	                <name>Peter Webb</name>
+	                <email />
+                        <organization>The MathWorks</organization>
+                        <organizationUrl>https://www.mathworks.com/</organizationUrl>
+                </developer>
+                <developer>
+	                <id>rboisvert</id>
+	                <name>Ronald F. Boisvert </name>
+	                <email>boisvert@nist.gov</email>
+                        <organization>NIST</organization>
+                        <organizationUrl>https://www.nist.gov</organizationUrl>
+                </developer>
+                <developer>
+	                <id>bmiller</id>
+	                <name>Bruce Miller </name>
+	                <email>bruce.miller@nist.gov</email>
+                        <organization>NIST</organization>
+                        <organizationUrl>https://www.nist.gov</organizationUrl>
+                </developer>
+                <developer>
+	                <id>rpozo</id>
+	                <name>Roldan Pozo</name>
+	                <email>pozo@nist.gov</email>
+                        <organization>NIST</organization>
+                        <organizationUrl>https://www.nist.gov</organizationUrl>
+                </developer>
+                <developer>
+	                <id>kremington</id>
+	                <name>Dr. Karin A. Remington</name>
+	                <email>kremington@nist.gov</email>
+                        <organization>NIST</organization>
+                        <organizationUrl>https://www.nist.gov</organizationUrl>
+                </developer>
+                <developer>
+	                <id>tweimer</id>
+	                <name>Tobias Weimer</name>
+	                <email>wishmaster51@gmail.com</email>
+                </developer>
+        </developers>
 
-	<organization>
-		<url>https://www.nist.gov/</url>
-		<name>NIST</name>
-	</organization>
+        <organization>
+                <url>https://www.nist.gov/</url>
+                <name>NIST</name>
+        </organization>
 </project>
