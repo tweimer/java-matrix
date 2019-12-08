@@ -7,9 +7,13 @@ import org.junit.jupiter.api.Test;
 
 
 class MatrixTest {
-    final double[][] avals = { { 1D, 4D, 7D, 10D }, { 2D, 5D, 8D, 11D }, { 3D, 6D, 9D, 12D } };
-    final double[] columnwise = { 1D, 2D, 3D, 4D, 5D, 6D, 7D, 8D, 9D, 10D, 11D, 12D };
-    final double[] rowwise = { 1D, 4D, 7D, 10D, 2D, 5D, 8D, 11D, 3D, 6D, 9D, 12D };
+    final double[][] avals = { { 1.0, 4.0, 7.0, 10.0 },
+                               { 2.0, 5.0, 8.0, 11.0 },
+                               { 3.0, 6.0, 9.0, 12.0 } };
+
+    final double[] columnwise = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0 };
+
+    final double[] rowwise = { 1.0, 4.0, 7.0, 10.0, 2.0, 5.0, 8.0, 11.0, 3.0, 6.0, 9.0, 12.0 };
 
     final double[][] rankdef = avals;
 
@@ -55,9 +59,9 @@ class MatrixTest {
         /** check that exception is thrown in constructWithCopy
             if input array is 'ragged' **/
         final double[][] rvals = {
-                { 1D, 4D, 7D },
-                { 2D, 5D, 8D, 11D },
-                { 3D, 6D, 9D, 12D }
+                { 1.0, 4.0, 7.0 },
+                { 2.0, 5.0, 8.0, 11.0 },
+                { 3.0, 6.0, 9.0, 12.0 }
              };
         assertThrows(IllegalArgumentException.class, () -> new Matrix(rvals),
                 "check that exception is thrown in default constructor if input array is 'ragged'");
@@ -130,12 +134,10 @@ class MatrixTest {
     @Test
     @DisplayName("Testing access methods")
     void testAccessMethods() {
-        final var rows = 3;
-        final var cols = 4;
         // Various get methods:
         final var B = new Matrix(avals);
-        assertEquals(rows, B.getRowDimension(), "getRowDimension failed ");
-        assertEquals(cols, B.getColumnDimension(), "getColumnDimension failed");
+        assertEquals(3, B.getRowDimension(), "getRowDimension failed ");
+        assertEquals(4, B.getColumnDimension(), "getColumnDimension failed");
 
         // Check if getArray returns the same array
         var barray = B.getArray();
@@ -173,7 +175,8 @@ class MatrixTest {
         // index ranges for sub Matrix
         final int ib = 1, ie = 2, jb = 1, je = 3;
 
-        final double[][] subavals = { { 5D, 8D, 11D }, { 6D, 9D, 12D } };
+        final double[][] subavals = { { 5.0, 8.0, 11.0 },
+                                      { 6.0, 9.0, 12.0 } };
 
         final int[] rowindexset = { 1, 2 }, columnindexset = { 1, 2, 3 }, badrowindexset = { 1, 3 },
                 badcolumnindexset = { 1, 2, 4 };
@@ -258,31 +261,22 @@ class MatrixTest {
     }
     
     @Test
-    @DisplayName("Testing linear algebra methods...")
-    public void testLinearAlgebra() {
-        final double columnsummax = 33D, rowsummax = 30D, sumofdiagonals = 15D, sumofsquares = 650D;
+    @DisplayName("Testing transpose...")
+    public void testTranspose() {
         final var A = new Matrix(columnwise, 3);
+        final var T = A.transpose();
         
         final double[][] tvals =
               { { 1D, 2D, 3D },
                 { 4D, 5D, 6D },
                 { 7D, 8D, 9D },
                 { 10D, 11D, 12D } };
-        final var T = A.transpose();
-        assertEquals(new Matrix(tvals), T, "transpose()... transpose unsuccessful");
-        
-        assertEquals(columnsummax, A.norm1(), 0D, "norm1()... incorrect norm calculation");
-        assertEquals(rowsummax, A.normInf(), 0D, "normInf()... incorrect norm calculation");
-        assertEquals(Math.sqrt(sumofsquares), A.normF(), 1E-13, "normF()... incorrect norm calculation");
-        assertEquals(sumofdiagonals, A.trace(), 0D, "trace()... incorrect norm calculation");
-        assertEquals(A.getMatrix(0, A.getRowDimension() - 1, 0, A.getRowDimension() - 1).det(), 0D, 0D,
-                "det()...incorrect determinant calculation");
-        
+        assertEquals(new Matrix(tvals), T, "transpose unsuccessful");
 
         final double[][] square = {
-                { 166D, 188D, 210D },
-                { 188D, 214D, 240D },
-                { 210D, 240D, 270D } };
+                { 166.0, 188.0, 210.0 },
+                { 188.0, 214.0, 240.0 },
+                { 210.0, 240.0, 270.0 } };
         
         final var SQ = new Matrix(square);
         assertEquals(SQ, A.times(T), "times(Matrix)... incorrect Matrix-Matrix product calculation");
@@ -290,6 +284,19 @@ class MatrixTest {
         final double[] columnwise2 = { 2D, 4D, 6D, 8D, 10D, 12D, 14D, 16D, 18D, 20D, 22D, 24D };
         assertEquals(new Matrix(columnwise2, 3), A.times(2), "times(double)... incorrect Matrix-scalar product calculation");
         assertEquals(new Matrix(3, 4), A.times(0), "times(double)... incorrect Matrix-scalar product calculation");
+    }        
+
+
+
+    @Test
+    @DisplayName("Testing norm...")
+    public void testNorm() {
+        final var A = new Matrix(columnwise, 3);
+        assertEquals(33.0, A.norm1(), 0.0, "incorrect norm1 calculation");
+        assertEquals(30.0, A.normInf(), 0.0, "incorrect normInf calculation");
+        assertEquals(Math.sqrt(650.0), A.normF(), 1E-13, "incorrect normF calculation");
+        assertEquals(15.0, A.trace(), 0.0, "trace()... incorrect norm calculation");
+        assertEquals(0.0, A.getMatrix(0, A.getRowDimension() - 1, 0, A.getRowDimension() - 1).det(), 0.0, "incorrect determinant calculation");
     }
     
     @Test
@@ -327,7 +334,8 @@ class MatrixTest {
     @Test
     @DisplayName("Testing condition")
     public void testCond() {
-        final double[][] condmat = { { 1D, 3D }, { 7D, 9D } };
+        final double[][] condmat = { { 1.0, 3.0 },
+                                     { 7.0, 9.0 } };
         final var B = new Matrix(condmat);
         final var SVD = B.svd();
         final double[] singularvalues = SVD.getSingularValues();
