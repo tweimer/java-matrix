@@ -47,7 +47,7 @@ class MatrixTest {
      **/
     @Test
     @DisplayName("Testing constructors and constructor-like methods...")
-    void testConstructor() {
+    public void testConstructor() {
 
         // should trigger bad shape for construction with val
         final var invalidld = 5;
@@ -85,7 +85,7 @@ class MatrixTest {
 
     @Test
     @DisplayName("Testing equals")
-    void testEquals() {
+    public void testEquals() {
         var A1 = new Matrix(avals);
         assertEquals(A1, A1, "equals not reflexive");
         assertFalse(A1.equals(null), "equals failed");
@@ -133,7 +133,7 @@ class MatrixTest {
      **/
     @Test
     @DisplayName("Testing access methods")
-    void testAccessMethods() {
+    public void testAccessMethods() {
         // Various get methods:
         final var B = new Matrix(avals);
         assertEquals(3, B.getRowDimension(), "getRowDimension failed ");

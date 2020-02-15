@@ -73,8 +73,7 @@ import static java.lang.Math.abs;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
-    
+public class Matrix extends RectangularMatrix implements Cloneable, Serializable {
     /**
      * For the Serializeable interface.
      */
@@ -86,23 +85,24 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @param A
      *            Two-dimensional array of doubles.
      * @return Matrix with copied array
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentExce
+     * ption
      *                All rows must have the same length
      * @throws NullPointerException
      *                Iff A or any sub-array is {@code null}.
      */
     public static Matrix constructWithCopy(final double[][] A) {
-        final var m = A.length;
-        final var n = A[0].length;
-        final var C = new double[m][];
+        final var nRows = A.length;
+        final var nColumns = A[0].length;
+        final var C = new double[nRows][];
         for (int i = 0; i < C.length; i++) {
-            if (A[i].length != n) {
+            if (A[i].length != nColumns) {
                 throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
             } else {
-                C[i] = Arrays.copyOf(A[i], n);
+                C[i] = Arrays.copyOf(A[i], nColumns);
             }
         }
-        return new Matrix(m, n, C);
+        return new Matrix(nRows, nColumns, C);
     }
 
     /**
@@ -137,17 +137,17 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
     /**
      * Generate identity matrix.
      *
-     * @param m
+     * @param nRows
      *            Number of rows.
-     * @param n
+     * @param nColumns
      *            Number of colums.
      * @return An m-by-n matrix with ones on the diagonal and zeros elsewhere.
      */
-    public static Matrix identity(final int m, final int n) {
-        final var I = new Matrix(m, n);
-        for (var i = 0; i < I.A.length; i++) {
-            for (var j = 0; j < I.A[i].length; j++) {
-                I.A[i][j] = i == j ? 1D : 0D;
+    public static Matrix identity(final int nRows, final int nColumns) {
+        final var I = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                I.A[r][c] = r == c ? 1D : 0D;
             }
         }
         return I;
@@ -167,15 +167,20 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
     /**
      * Generate matrix with random elements.
      *
-     * @param m
+     * @param nRows
      *            Number of rows.
-     * @param n
+     * @param nColumns
      *            Number of colums.
      * @return An m-by-n matrix with uniformly distributed random elements.
      */
-    public static Matrix random(final int m, final int n) {
-        final var R = new Matrix(m, n);
-        R.random();
+    public static Matrix random(final int nRows, final int nColumns) {
+        final var R = new Matrix(nRows, nColumns);
+        final var rnd = new Random();
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                R.A[r][c] = rnd.nextDouble();
+            }
+        }
         return R;
     }
 
@@ -193,16 +198,21 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
     /**
      * Generate matrix with random elements.
      *
-     * @param m
+     * @param nRows
      *            Number of rows.
-     * @param n
+     * @param nColumns
      *            Number of colums.
      * @return An m-by-n matrix with uniformly distributed random elements.
      */
-    public static Matrix randomInt(final int m, final int n) {
-        final var A = new Matrix(m, n);
-        A.randomInt();
-        return A;
+    public static Matrix randomInt(final int nRows, final int nColumns) {
+        final var M = new Matrix(nRows, nColumns);
+        final var rnd = new Random();
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[r][c] = rnd.nextInt();
+            }
+        }
+        return M;
     }
 
     /**
@@ -289,33 +299,24 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
     private final double[][] A;
 
     /**
-     * Row and column dimensions.
-     *
-     * @serial row dimension.
-     * @serial column dimension.
-     */
-    private final int m, n;
-
-    /**
      * Construct a matrix from a one-dimensional packed array.
      *
      * @param vals
      *            One-dimensional array of doubles, packed by columns (ala
      *            Fortran).
-     * @param m
+     * @param nRows
      *            Number of rows.
      * @throws IllegalArgumentException
      *             Array length must be a multiple of m.
      */
-    public Matrix(final double[] vals, final int m) {
-        this.n = m != 0 ? vals.length / m : 0;
-        if (m * this.n != vals.length) {
+    public Matrix(final double[] vals, final int nRows) {
+        this(nRows, nRows != 0 ? vals.length / nRows : 0);
+        if (nRows * nColumns != vals.length) {
             throw new IllegalArgumentException("Array length must be a multiple of m."); //$NON-NLS-1$
         } else {
-            this.A = new double[this.m = m][this.n];
-            for (var i = 0; i < this.A.length; i++) {
-                for (var j = 0; j < this.A[i].length; j++) {
-                    this.A[i][j] = vals[i + j * m];
+            for (var i = 0; i < nRows; i++) {
+                for (var j = 0; j < nColumns; j++) {
+                    this.A[i][j] = vals[i + j * nRows];
                 }
             }
         }
@@ -339,7 +340,7 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
 
         // check if each row has the same length
         for (var r : this.A) {
-            if (r.length != this.n) {
+            if (r.length != nColumns) {
                 throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
             }
         }
@@ -348,9 +349,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
     /**
      * Construct a matrix quickly without checking arguments.
      *
-     * @param m
+     * @param nRows
      *            Number of rows.
-     * @param n
+     * @param nColumns
      *            Number of colums.
      * @param A
      *            Two-dimensional array of doubles. This does <b>not</b> copy
@@ -358,10 +359,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *            You should avoid modifying that array afterwards,
      *            as this matrix is backed by that array
      */
-    public Matrix(final int m, final int n, final double[][] A) {
+    public Matrix(final int nRows, final int nColumns, final double[][] A) {
+        super(nRows, nColumns);
         this.A = A;
-        this.m = m;
-        this.n = n;
     }
 
     /**
@@ -389,28 +389,29 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
     /**
      * Construct an m-by-n matrix of zeros.
      *
-     * @param m
+     * @param nRows
      *            Number of rows.
-     * @param n
+     * @param nColumns
      *            Number of colums
      */
-    public Matrix(final int m, final int n) {
-        this.A = new double[this.m = m][this.n = n];
+    public Matrix(final int nRows, final int nColumns) {
+        super(nRows, nColumns);
+        this.A = new double[nRows][nColumns];
     }
 
     /**
      * Construct an m-by-n constant matrix.
      *
-     * @param m
+     * @param nRows
      *            Number of rows.
-     * @param n
+     * @param nColumns
      *            Number of colums.
      * @param s
      *            Fill the matrix with this scalar value.
      */
-    public Matrix(final int m, final int n, final double s) {
-        this(m, n);
-        this.set(s);
+    public Matrix(final int nRows, final int nColumns, final double s) {
+        this(nRows, nColumns);
+        this.fill(s);
     }
 
     /**
@@ -420,26 +421,26 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *            Matrix to be copied
      */
     public Matrix(final Matrix X) {
-        this(X.m, X.n, X.getArrayCopy());
+        this(X.nRows, X.nColumns, X.getArrayCopy());
     }
     
 
    /**
     * This is used to build a Matrix with a functional interface.
     *
-    * @param m
+    * @param nRows
     *            Number of rows.
-    * @param n
+    * @param nColumns
     *            Number of colums.
     * @param matrix
     *            A lambda expression that describes the given Matrix.
     *            It must return valid numbers within the given number of rows and columns.
     *            Any {@link RuntimeException} in {@link FunctionalMatrix#get(int, int)} is thrown back to the caller.
     */
-    public Matrix(final int m, final int n, FunctionalMatrix matrix) {
-        this(m, n);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
+    public Matrix(final int nRows, final int nColumns, final FunctionalMatrix matrix) {
+        this(nRows, nColumns);
+        for (var i = 0; i < nRows; i++) {
+            for (var j = 0; j < nColumns; j++) {
                 this.A[i][j] = matrix.get(i, j);
             }
         }
@@ -448,9 +449,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
     /**
      * This is used to build a Matrix with a functional interface.
      *
-     * @param m
+     * @param nRows
      *            Number of rows.
-     * @param n
+     * @param nColumns
      *            Number of colums.
      * @param matrix
      *            A lambda expression that describes the given Matrix.
@@ -458,10 +459,11 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *            Any {@link RuntimeException} in {@link FunctionalMatrix#get(int, int)} is thrown back to the caller.
      * @param f This is applied after parameter matrix is evaluated.
      */
-     public Matrix(final int m, final int n, FunctionalMatrix matrix, DoubleUnaryOperator f) {
-         this(m, n);
-         for (var i = 0; i < this.A.length; i++) {
-             for (var j = 0; j < this.A[i].length; j++) {
+     public Matrix(final int nRows, final int nColumns,
+             final FunctionalMatrix matrix, final DoubleUnaryOperator f) {
+         this(nRows, nColumns);
+         for (var i = 0; i < nRows; i++) {
+             for (var j = 0; j < nColumns; j++) {
                  this.A[i][j] = f.applyAsDouble(matrix.get(i, j));
              }
          }
@@ -520,10 +522,10 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public Matrix arrayLeftDivide(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final var M = new Matrix(this.m, this.n);
-        for (var i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
-                M.A[i][j] = B.A[i][j] / this.A[i][j];
+        final var M = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (int c = 0; c < nColumns; c++) {
+                M.A[r][c] = B.A[r][c] / this.A[r][c];
             }
         }
         return M;
@@ -537,9 +539,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public void arrayLeftDivideEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                this.A[i][j] = B.A[i][j] / this.A[i][j];
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                this.A[r][c] = B.A[r][c] / this.A[r][c];
             }
         }
     }
@@ -553,10 +555,10 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public Matrix arrayRightDivide(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final var M = new Matrix(this.m, this.n);
-        for (int i = 0; i < this.A.length; i++) {
-            for (int j = 0; j < this.A[i].length; j++) {
-                M.A[i][j] = this.A[i][j] / B.A[i][j];
+        final var M = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[r][c] = this.A[r][c] / B.A[r][c];
             }
         }
         return M;
@@ -570,9 +572,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public void arrayRightDivideEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                this.A[i][j] /= B.A[i][j];
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                this.A[r][c] /= B.A[r][c];
             }
         }
     }
@@ -587,10 +589,10 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public Matrix arrayTimes(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final var M = new Matrix(this.m, this.n);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                M.A[i][j] = this.A[i][j] * B.A[i][j];
+        final var M = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[r][c] = this.A[r][c] * B.A[r][c];
             }
         }
         return M;
@@ -605,9 +607,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public void arrayTimesEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                this.A[i][j] *= B.A[i][j];
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                this.A[r][c] *= B.A[r][c];
             }
         }
     }
@@ -634,7 +636,7 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *         false if B==null.
      */
     public boolean equalDimensions(final Matrix B) {
-        return B != null && B.m == this.m && B.n == this.n;
+        return B != null && B.nRows == nRows && B.nColumns == nColumns;
     }
 
     /**
@@ -696,7 +698,7 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public boolean equals(final Matrix other) {
         return (other == this)
-                || (other != null && this.m == other.m && this.n == other.n && Arrays.deepEquals(this.A, other.A));
+                || (other != null && nRows == other.nRows && nColumns == other.nColumns && Arrays.deepEquals(this.A, other.A));
     }
 
     /**
@@ -719,23 +721,23 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @return entry
      */
     public double get(final int i) {
-        return this.A[i / this.m][i % this.n];
+        return this.A[i / nRows][i % nColumns];
     }
 
     /**
      * Get a single element.
      *
-     * @param i
+     * @param r
      *            Row index.
-     * @param j
+     * @param c
      *            Column index.
      * @return A(i,j)
      * @throws ArrayIndexOutOfBoundsException
      *             if indices are invalid
      */
     @Override
-    public double get(final int i, final int j) {
-        return this.A[i][j];
+    public double get(final int r, final int c) {
+        return this.A[r][c];
     }
 
     /**
@@ -754,21 +756,14 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *
      * @return Two-dimensional array copy of matrix elements.
      */
+    @Override
     public double[][] getArrayCopy() {
-        final var C = new double[this.m][];
-        for (var i = 0; i < C.length; i++) {
-            C[i] = Arrays.copyOf(this.A[i], this.n);
+        // Copying the array itsself is faster then the default implementation.
+        final var C = new double[nRows][];
+        for (var r = 0; r < nRows; r++) {
+            C[r] = Arrays.copyOf(this.A[r], nColumns);
         }
         return C;
-    }
-
-    /**
-     * Get column dimension.
-     *
-     * @return n, the number of columns.
-     */
-    public int getColumnDimension() {
-        return this.n;
     }
 
     /**
@@ -777,10 +772,10 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @return Matrix elements packed in a one-dimensional array by columns.
      */
     public double[] getColumnPackedCopy() {
-        final double[] vals = new double[this.m * this.n];
-        for (int i = 0; i < this.m; i++) {
-            for (int j = 0; j < this.n; j++) {
-                vals[i + j * this.m] = this.A[i][j];
+        final var vals = new double[nRows * nColumns];
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                vals[r + c * nRows] = this.A[r][c];
             }
         }
         return vals;
@@ -792,7 +787,7 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @return Matrix elements packed in a one-dimensional array by rows.
      */
     public double[] getRowPackedCopy() {
-        final var vals = new double[this.m * this.n];
+        final var vals = new double[nRows * nColumns];
         var i = 0;
         for (var row : this.A) {
             for (var d : row) {
@@ -903,15 +898,6 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
     }
 
     /**
-     * Get row dimension.
-     *
-     * @return m, the number of rows.
-     */
-    public int getRowDimension() {
-        return this.m;
-    }
-
-    /**
      * Returns a deep hash code for this Matrix.
      * @return hash code
      */
@@ -928,16 +914,7 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @see #solve
      */
     public Matrix inverse() {
-        return solve(identity(m));
-    }
-
-    /**
-     * Checks if this Matrix is square.
-     *
-     * @return true iff this Matrix is square, false otherwise.
-     */
-    public boolean isSquare() {
-        return this.m == this.n;
+        return solve(identity(nRows));
     }
 
     /**
@@ -960,13 +937,13 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public Matrix minus(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final var A = new double[m][n];
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                A[i][j] = this.A[i][j] - B.A[i][j];
+        final var M = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[r][c] = this.A[r][c] - B.A[r][c];
             }
         }
-        return new Matrix(m, n, A);
+        return M;
     }
 
     /**
@@ -978,9 +955,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public void minusEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                this.A[i][j] -= B.A[i][j];
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                this.A[r][c] -= B.A[r][c];
             }
         }
     }
@@ -991,17 +968,17 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @return maximum column sum.
      */
     public double norm1() {
-        var f = 0D;
-        for (var j = 0; j < this.n; j++) {
-            var s = 0D;
-            for (var i = 0; i < this.m; i++) {
-                s += abs(this.A[i][j]);
+        var norm1 = 0D;
+        for (var c = 0; c < nColumns; c++) {
+            var colSum = 0D;
+            for (var r = 0; r < nRows; r++) {
+                colSum += abs(this.A[r][c]);
             }
-            if (f < s) {
-                f = s;
+            if (norm1 < colSum) {
+                norm1 = colSum;
             }
         }
-        return f;
+        return norm1;
     }
 
     /**
@@ -1019,13 +996,13 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @return sqrt of sum of squares of all elements.
      */
     public double normF() {
-        double f = 0;
+        double normF = 0;
         for (final double[] row : this.A) {
             for (final double d : row) {
-                f = hypot(f, d);
+                normF = hypot(normF, d);
             }
         }
-        return f;
+        return normF;
     }
 
     /**
@@ -1034,17 +1011,17 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @return maximum row sum.
      */
     public double normInf() {
-        var f = 0D;
+        var normInf = 0D;
         for (final var row : this.A) {
-            var s = 0D;
+            var rowSum = 0D;
             for (final var d : row) {
-                s += abs(d);
+                rowSum += abs(d);
             }
-            if (f < s) {
-                f = s;
+            if (normInf < rowSum) {
+                normInf = rowSum;
             }
         }
-        return f;
+        return normInf;
     }
 
     /**
@@ -1053,14 +1030,32 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @param B
      *            another matrix
      * @return new Matrix A + B
+     * @throws IllegalArgumentException
+     *     Iff matrix dimensions don't agree
      * @see #plusEquals
      */
     public Matrix plus(final Matrix B) {
         this.checkMatrixDimensions(B);
-        final var M = new Matrix(this.m, this.n);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                M.A[i][j] = this.A[i][j] + B.A[i][j];
+        // urgh, casting needed, to avoid a recursion
+        // cast safe, since Matrix is subtype of FunctionalMatrix
+        return plus((FunctionalMatrix)B);
+    }
+
+    /**
+     * This adds all elements of the argument to this Matrix,
+     * without doing any bounds checks.
+     * 
+     * @param m
+     *   Another functional Matrix
+     * @return
+     *  Returns a new matrix of same size as this,
+     *  with the result of the addition.
+     */
+    public Matrix plus(final FunctionalMatrix m) {
+        final var M = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[r][c] = this.A[r][c] + m.get(r, c);
             }
         }
         return M;
@@ -1075,9 +1070,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      */
     public void plusEquals(final Matrix B) {
         this.checkMatrixDimensions(B);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                this.A[i][j] += B.A[i][j];
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                this.A[r][c] += B.A[r][c];
             }
         }
     }
@@ -1183,29 +1178,6 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
         return new QRDecomposition(this);
     }
 
-    /**
-     * Creates a random Matrix.
-     */
-    public void random() {
-        final var rnd = new Random();
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                this.A[i][j] = rnd.nextDouble();
-            }
-        }
-    }
-
-    /**
-     * Creates a random Matrix.
-     */
-    public void randomInt() {
-        final var rnd = new Random();
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                this.A[i][j] = rnd.nextInt();
-            }
-        }
-    }
 
     /**
      * Matrix rank.
@@ -1214,7 +1186,7 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @see SingularValueDecomposition#rank
      */
     public int rank() {
-        return this.svd().rank();
+        return svd().rank();
     }
 
     /**
@@ -1223,11 +1195,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @param s
      *            scalar
      */
-    public void set(final double s) {
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                this.A[i][j] = s;
-            }
+    public void fill(final double s) {
+        for (var row : A) {
+            Arrays.fill(row, s);
         }
     }
 
@@ -1240,7 +1210,7 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *            scalar
      */
     public void set(final int i, final double s) {
-        this.A[i / this.m][i % this.n] = s;
+        this.A[i / nRows][i % nColumns] = s;
     }
 
     /**
@@ -1272,9 +1242,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *            A(r0:r1,c0:c1)
      */
     public void setMatrix(final int r0, final int r1, final int c0, final int c1, final Matrix X) {
-        for (var i = r0; i <= r1; i++) {
-            for (var j = c0; j <= c1; j++) {
-                this.A[i][j] = X.A[i - r0][j - c0];
+        for (var r = r0; r <= r1; r++) {
+            for (var c = c0; c <= c1; c++) {
+                this.A[r][c] = X.A[r - r0][c - c0];
             }
         }
     }
@@ -1347,15 +1317,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *         rank deficient).
      */
     public Matrix solve(final Matrix B) {
-        return this.getSolver().solve(B);
+        return (nRows == nColumns ? lu().solve(B) : qr().solve(B));
     }
 
-    /**
-     * @return
-     */
-    private ISolver getSolver() {
-        return this.m == this.n ? this.lu() : this.qr();
-    }
 
     /**
      * Solve X*A = B, which is also A'*X' = B'.
@@ -1388,10 +1352,10 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @return new Matrix s*A
      */
     public Matrix times(final double s) {
-        final var M = new Matrix(this.m, this.n);
-        for (var i = 0; i < this.m; i++) {
-            for (var j = 0; j < this.n; j++) {
-                M.A[i][j] = s * this.A[i][j];
+        final var M = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[r][c] = s * this.A[r][c];
             }
         }
         return M;
@@ -1402,20 +1366,22 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *
      * @param B
      *            another matrix
-     * @return Matrix product, A * B, null if matrix dimensions don't agree.
+     * @return Matrix product, A * B
+     * @throws
+     *   IndexOutOfBoundsException Iff matrix dimension don't agree
      */
     public Matrix times(final Matrix B) {
-        if (B.m != this.n) {
-            return null;
+        if (B.nRows != nColumns) {
+            throw new IndexOutOfBoundsException(B.nRows);
         } else {
-            final var X = new Matrix(this.m, B.n);
-            for (var j = 0; j < B.n; j++) {
-                for (var i = 0; i < this.m; i++) {
+            final var X = new Matrix(nRows, B.nColumns);
+            for (var c1 = 0; c1 < B.nColumns; c1++) {
+                for (var r = 0; r < nRows; r++) {
                     var s = 0D;
-                    for (var k = 0; k < this.n; k++) {
-                        s += this.A[i][k] * B.A[k][j];
+                    for (var c2 = 0; c2 < nColumns; c2++) {
+                        s += this.A[r][c2] * B.A[c2][c1];
                     }
-                    X.A[i][j] = s;
+                    X.A[r][c1] = s;
                 }
             }
             return X;
@@ -1429,9 +1395,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *            scalar
      */
     public void timesEquals(final double s) {
-        for (var i = 0; i < this.m; i++) {
-            for (var j = 0; j < this.n; j++) {
-                this.A[i][j] *= s;
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                this.A[r][c] *= s;
             }
         }
     }
@@ -1460,7 +1426,7 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @return sum of the diagonal elements.
      */
     public double trace() {
-        final var dim = this.m < this.n ? this.m : this.n;
+        final var dim = nRows < nColumns ? nRows : nColumns;
         var trace = 0D;
         for (var i = 0; i < dim; i++) {
             trace += this.A[i][i];
@@ -1479,10 +1445,10 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @see #transformEquals(DoubleUnaryOperator)
      */
     public Matrix transform(final DoubleUnaryOperator operator) {
-        final var M = new Matrix(this.m, this.n);
-        for (var i = 0; i < this.m; i++) {
-            for (var j = 0; j < this.n; j++) {
-                M.A[i][j] = operator.applyAsDouble(this.A[i][j]);
+        final var M = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[r][c] = operator.applyAsDouble(this.A[r][c]);
             }
         }
         return M;
@@ -1498,9 +1464,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @see #transform(DoubleUnaryOperator)
      */
     public void transformEquals(final DoubleUnaryOperator operator) {
-        for (var i = 0; i < this.m; i++) {
-            for (var j = 0; j < this.n; j++) {
-                this.A[i][j] = operator.applyAsDouble(this.A[i][j]);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                this.A[r][c] = operator.applyAsDouble(this.A[r][c]);
             }
         }
     }
@@ -1518,10 +1484,10 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @see #transformEquals(Matrix, DoubleBinaryOperator)
      */
     public Matrix transform(final FunctionalMatrix B, final DoubleBinaryOperator operator) {
-        final var M = new Matrix(this.m, this.n);
-        for (var i = 0; i < this.m; i++) {
-            for (var j = 0; j < this.n; j++) {
-                M.A[i][j] = operator.applyAsDouble(this.get(i, j), B.get(i, j));
+        final var M = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[r][c] = operator.applyAsDouble(this.get(r, c), B.get(r, c));
             }
         }
         return M;
@@ -1539,9 +1505,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * @see #transform(Matrix, DoubleBinaryOperator)
      */
     public void transformEquals(final FunctionalMatrix B, final DoubleBinaryOperator operator) {
-        for (var i = 0; i < this.m; i++) {
-            for (var j = 0; j < this.n; j++) {
-                this.A[i][j] = operator.applyAsDouble(this.get(i, j), B.get(i, j));
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                this.A[r][c] = operator.applyAsDouble(this.get(r, c), B.get(r, c));
             }
         }
     }
@@ -1551,11 +1517,12 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *
      * @return new Matrix A'
      */
+    @Override
     public Matrix transpose() {
-        final var M = new Matrix(this.n, this.m);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                M.A[j][i] = this.A[i][j];
+        final var M = new Matrix(nColumns, nRows);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[c][r] = this.A[r][c];
             }
         }
         return M;
@@ -1565,11 +1532,11 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      * Transposes this matrix.
      */
     public void transposeThis() {
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < i; j++) {
-                final var t = this.A[i][j];
-                this.A[i][j] = this.A[j][i];
-                this.A[j][i] = t;
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < r; c++) {
+                final var t = this.A[r][c];
+                this.A[r][c] = this.A[c][r];
+                this.A[c][r] = t;
             }
         }
     }
@@ -1579,11 +1546,12 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *
      * @return new Matrix -A
      */
+    @Override
     public Matrix uminus() {
-        final var M = new Matrix(this.m, this.n);
-        for (var i = 0; i < this.A.length; i++) {
-            for (var j = 0; j < this.A[i].length; j++) {
-                M.A[i][j] = -this.A[i][j];
+        final var M = new Matrix(nRows, nColumns);
+        for (var r = 0; r < nRows; r++) {
+            for (var c = 0; c < nColumns; c++) {
+                M.A[r][c] = -this.A[r][c];
             }
         }
         return M;

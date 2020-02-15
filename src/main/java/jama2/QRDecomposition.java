@@ -20,7 +20,7 @@ import java.io.Serializable;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable {
+public class QRDecomposition implements FunctionalMatrix, Serializable {
     /**
      * For the Serializable interface.
      */
@@ -39,7 +39,7 @@ public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * @serial column dimension.
      * @serial row dimension.
      */
-    private final int m, n;
+    private final int nRows, nColumns;
 
     /**
      * Array for internal storage of diagonal of R.
@@ -59,18 +59,18 @@ public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable 
      *            Rectangular matrix
      *@see Matrix#qr()
      */
-    QRDecomposition(final Matrix A) {
+    QRDecomposition(final SizedMatrix A) {
         // Initialize.
         QR = A.getArrayCopy();
-        m = A.getRowDimension();
-        n = A.getColumnDimension();
-        Rdiag = new double[n];
+        nRows = A.getRowDimension();
+        nColumns = A.getColumnDimension();
+        Rdiag = new double[nColumns];
 
         // Main loop.
-        for (var k = 0; k < n; k++) {
+        for (var k = 0; k < nColumns; k++) {
             // Compute 2-norm of k-th column without under/overflow.
             var nrm = 0.0;
-            for (var i = k; i < m; i++) {
+            for (var i = k; i < nRows; i++) {
                 nrm = Maths.hypot(nrm, this.QR[i][k]);
             }
 
@@ -79,19 +79,19 @@ public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable 
                 if (QR[k][k] < 0.0) {
                     nrm = -nrm;
                 }
-                for (var i = k; i < m; i++) {
+                for (var i = k; i < nRows; i++) {
                     QR[i][k] /= nrm;
                 }
                 QR[k][k]++;
 
                 // Apply transformation to remaining columns.
-                for (var j = k + 1; j < n; j++) {
+                for (var j = k + 1; j < nColumns; j++) {
                     var s = 0.0;
-                    for (var i = k; i < m; i++) {
+                    for (var i = k; i < nRows; i++) {
                         s += QR[i][k] * QR[i][j];
                     }
                     s /= -QR[k][k];
-                    for (var i = k; i < m; i++) {
+                    for (var i = k; i < nRows; i++) {
                         QR[i][j] += s * QR[i][k];
                     }
                 }
@@ -107,13 +107,13 @@ public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * whose columns define the reflections
      */
     public Matrix getH() {
-        final var H = new double[m][n];
-        for (var i = 0; i < m; i++) {
+        final var H = new double[nRows][nColumns];
+        for (var i = 0; i < nRows; i++) {
             for (var j = 0; j <= i; j++) {
                 H[i][j] = QR[i][j];
             }
         }
-        return new Matrix(m, n, H);
+        return new Matrix(nRows, nColumns, H);
     }
 
     /**
@@ -122,26 +122,26 @@ public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * @return m &times; n (economy-sized) orthogonal factor Q
      */
     public Matrix getQ() {
-        final var Q = new double[m][n];
-        for (var k = n - 1; k >= 0; k--) {
-            for (var i = 0; i < m; i++) {
+        final var Q = new double[nRows][nColumns];
+        for (var k = nColumns - 1; k >= 0; k--) {
+            for (var i = 0; i < nRows; i++) {
                 Q[i][k] = 0D;
             }
             Q[k][k] = 1D;
-            for (var j = k; j < n; j++) {
+            for (var j = k; j < nColumns; j++) {
                 if (QR[k][k] != 0) {
                     var s = 0D;
-                    for (var i = k; i < m; i++) {
+                    for (var i = k; i < nRows; i++) {
                         s += QR[i][k] * Q[i][j];
                     }
                     s /= -QR[k][k];
-                    for (var i = k; i < m; i++) {
+                    for (var i = k; i < nRows; i++) {
                         Q[i][j] += s * QR[i][k];
                     }
                 }
             }
         }
-        return new Matrix(m, n, Q);
+        return new Matrix(nRows, nColumns, Q);
     }
 
     /**
@@ -150,13 +150,13 @@ public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * @return n &times; n upper triangular factor R
      */
     public Matrix getR() {
-        final var R = new double[n][n];
-        for (var i = 0; i < n; i++) {
-            for (var j = i; j < n; j++) {
+        final var R = new double[nColumns][nColumns];
+        for (var i = 0; i < nColumns; i++) {
+            for (var j = i; j < nColumns; j++) {
                 R[i][j] = ((i < j) ? QR[i][j] : Rdiag[i]);
             }
         }
-        return new Matrix(n, R);
+        return new Matrix(nColumns, R);
     }
 
     /**
@@ -182,9 +182,8 @@ public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable 
      *         deficient. Returns X that minimizes the two norm of Q*R*X-B
      *         Matrix row otherwise.
      */
-    @Override
     public Matrix solve(final Matrix B) {
-        if (B.getRowDimension() != this.m) {
+        if (B.getRowDimension() != this.nRows) {
             return null;
         } else if (!this.isFullRank()) {
             return null;
@@ -196,21 +195,21 @@ public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable 
 
         // Compute Y = transpose(Q)*B
         final int nx = B.getColumnDimension();
-        for (var k = 0; k < this.n; k++) {
+        for (var k = 0; k < this.nColumns; k++) {
             for (var j = 0; j < nx; j++) {
                 var s = 0D;
-                for (var i = k; i < this.m; i++) {
+                for (var i = k; i < this.nRows; i++) {
                     s += this.QR[i][k] * X[i][j];
                 }
                 s /= -this.QR[k][k];
-                for (var i = k; i < this.m; i++) {
+                for (var i = k; i < this.nRows; i++) {
                     X[i][j] += s * this.QR[i][k];
                 }
             }
         }
         
         // Solve R*X = Y;
-        for (var k = this.n - 1; k >= 0; k--) {
+        for (var k = this.nColumns - 1; k >= 0; k--) {
             for (var j = 0; j < nx; j++) {
                 X[k][j] /= this.Rdiag[k];
             }
@@ -220,7 +219,7 @@ public class QRDecomposition implements ISolver, FunctionalMatrix, Serializable 
                 }
             }
         }
-        return M.getMatrix(0, this.n - 1, 0, nx - 1);
+        return M.getMatrix(0, this.nColumns - 1, 0, nx - 1);
     }
 
     /**

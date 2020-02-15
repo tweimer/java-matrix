@@ -23,7 +23,7 @@ import java.util.Arrays;
  * @version 2.0
  * @see <a href="http://tweimer.github.io/java-matrix/">java-matrix</a>
  */
-public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable {
+public class LUDecomposition implements FunctionalMatrix, Serializable {
     /**
      * For the Serializeable interface
      */
@@ -43,7 +43,7 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * @serial row dimension.
      * @serial pivot sign.
      */
-    private final int m, n, pivsign;
+    private final int nRows, nColumns, pivsign;
 
     /**
      * Internal storage of pivot vector.
@@ -70,24 +70,25 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
      *            If true, use Gaussian elimination,
      *            otherwise Crout algorithm.
      */
-    LUDecomposition(final Matrix A, final boolean linpackflag) {
+    LUDecomposition(final SizedMatrix A, final boolean linpackflag) {
         // Initialize.
         LU = A.getArrayCopy();
-        m = A.getRowDimension();
-        n = A.getColumnDimension();
-        piv = new int[this.m];
+        nRows = A.getRowDimension();
+        nColumns = A.getColumnDimension();
         
-        for (var i = 1; i < m; i++) {
+        // Init piv 1....m
+        piv = new int[this.nRows];
+        for (var i = 1; i < nRows; i++) {
             piv[i] = i;
         }
         
         var pivsign = 1;
         if (linpackflag) {
             // Main loop.
-            for (var k = 0; k < n; k++) {
+            for (var k = 0; k < nColumns; k++) {
                 // Find pivot.
                 var p = k;
-                for (var i = k + 1; i < m; i++) {
+                for (var i = k + 1; i < nRows; i++) {
                     if (Math.abs(LU[i][k]) > Math.abs(LU[p][k])) {
                         p = i;
                     }
@@ -95,7 +96,7 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
                 
                 // Exchange if necessary.
                 if (p > k) {
-                    for (var j = 0; j < n; j++) {
+                    for (var j = 0; j < nColumns; j++) {
                         final var t = LU[p][j];
                         LU[p][j] = LU[k][j];
                         LU[k][j] = t;
@@ -111,10 +112,10 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
                 }
                 
                 // Compute multipliers and eliminate k-th column.
-                if (LU[k][k] != 0D) {
-                    for (var i = k + 1; i < m; i++) {
+                if (LU[k][k] != 0.0) {
+                    for (var i = k + 1; i < nRows; i++) {
                         LU[i][k] /= LU[k][k];
-                        for (var j = k + 1; j < n; j++) {
+                        for (var j = k + 1; j < nColumns; j++) {
                             LU[i][j] -= LU[i][k] * LU[k][j];
                         }
                     }
@@ -122,21 +123,21 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
             }
         } else {
             // Outer loop.
-            for (var j = 0; j < n; j++) {
-                final var LUcolj = new double[this.m];
+            for (var j = 0; j < nColumns; j++) {
+                final var LUcolj = new double[nRows];
 
                 // Make a copy of the j-th column to localize references.
-                for (var i = 0; i < this.m; i++) {
+                for (var i = 0; i < nRows; i++) {
                     LUcolj[i] = this.LU[i][j];
                 }
 
                 // Apply previous transformations.
-                for (var i = 0; i < m; i++) {
+                for (var i = 0; i < nRows; i++) {
                     final var LUrowi = LU[i];
 
                     // Most of the time is spent in the following dot product.
                     final var kmax = Math.min(i, j);
-                    var s = 0D;
+                    var s = 0.0;
                     for (var k = 0; k < kmax; k++) {
                         s += LUrowi[k] * LUcolj[k];
                     }
@@ -145,7 +146,7 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
 
                 // Find pivot and exchange if necessary.
                 var p = j;
-                for (var i = j + 1; i < m; i++) {
+                for (var i = j + 1; i < nRows; i++) {
                     if (Math.abs(LUcolj[i]) > Math.abs(LUcolj[p])) {
                         p = i;
                     }
@@ -167,8 +168,8 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
                 }
 
                 // Compute multipliers.
-                if ((j < m) && (LU[j][j] != 0D)) {
-                    for (var i = j + 1; i < m; i++) {
+                if ((j < nRows) && (LU[j][j] != 0.0)) {
+                    for (var i = j + 1; i < nRows; i++) {
                         LU[i][j] /= LU[j][j];
                     }
                 }
@@ -199,7 +200,7 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
      *         matrix is singular.
      */
     public double det() {
-        if (m == n) {
+        if (nRows == nColumns) {
             // go through the LU decomposition
             // For A = P*L*U, det(A)=det(P)*det(L)*det(U), where
             // det(P) is pivsign
@@ -207,7 +208,7 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
             // det(U) is the product of the diagonal entries
             // So lets start with pivsign and multiply with the diagonal entries.
             double det = pivsign;
-            for (var j = 0; j < this.n; j++) {
+            for (var j = 0; j < this.nColumns; j++) {
                 det *= this.LU[j][j];
             }
             return det;
@@ -222,8 +223,8 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * @return (double) piv
      */
     public double[] getDoublePivot() {
-        final var vals = new double[this.m];
-        for (var i = 0; i < this.m; i++) {
+        final var vals = new double[this.nRows];
+        for (var i = 0; i < this.nRows; i++) {
             vals[i] = this.piv[i];
         }
         return vals;
@@ -235,15 +236,15 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * @return L lower triangular factor
      */
     public Matrix getL() {
-        final var L = new double[this.m][this.n];
-        for (var i = 0; i < this.m; i++) {
+        final var L = new double[this.nRows][this.nColumns];
+        for (var i = 0; i < this.nRows; i++) {
             for (var j = 0; j < i; j++) {
                 L[i][j] = this.LU[i][j];
             }
 
             L[i][i] = 1D;
         }
-        return new Matrix(this.m, this.n, L);
+        return new Matrix(this.nRows, this.nColumns, L);
     }
 
     /**
@@ -252,7 +253,7 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * @return piv pivot permutation vector
      */
     public int[] getPivot() {
-        return Arrays.copyOf(this.piv, this.m);
+        return Arrays.copyOf(this.piv, this.nRows);
     }
 
     /**
@@ -261,13 +262,13 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * @return U upper triangular factor
      */
     public Matrix getU() {
-        final var U = new double[this.n][this.n];
-        for (var i = 0; i < this.n; i++) {
-            for (var j = i; j < this.n; j++) {
+        final var U = new double[this.nColumns][this.nColumns];
+        for (var i = 0; i < this.nColumns; i++) {
+            for (var j = i; j < this.nColumns; j++) {
                 U[i][j] = this.LU[i][j];
             }
         }
-        return new Matrix(this.n, U);
+        return new Matrix(this.nColumns, U);
     }
 
     /**
@@ -276,8 +277,8 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
      * @return true if U, and hence A, is nonsingular.
      */
     public boolean isNonsingular() {
-        for (var j = 0; j < this.n; j++) {
-            if (this.LU[j][j] == 0) {
+        for (var j = 0; j < this.nColumns; j++) {
+            if (this.LU[j][j] == 0.0) {
                 return false;
             }
         }
@@ -293,30 +294,29 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
      *         singular. Returns X so that <code>L*U*X = B(piv,:)</code> otherwise.
      * @throws NullPointerException Iff <code>B == null</code>
      */
-    @Override
     public Matrix solve(final Matrix B) {
-        if ((B.getRowDimension() == this.m) && this.isNonsingular()) {
+        if ((B.getRowDimension() == this.nRows) && this.isNonsingular()) {
             // Copy right hand side with pivoting
             final int nx = B.getColumnDimension();
             final var Xmat = B.getMatrix(this.piv, 0, nx - 1);
             final var X = Xmat.getArray();
 
             // Solve L*Y = B(piv,:)
-            for (int k = 0; k < this.n; k++) {
-                for (int i = k + 1; i < this.n; i++) {
-                    for (int j = 0; j < nx; j++) {
+            for (var k = 0; k < this.nColumns; k++) {
+                for (var i = k + 1; i < this.nColumns; i++) {
+                    for (var j = 0; j < nx; j++) {
                         X[i][j] -= X[k][j] * this.LU[i][k];
                     }
                 }
             }
             // Solve U*X = Y;
-            for (int k = this.n - 1; k >= 0; k--) {
-                for (int j = 0; j < nx; j++) {
+            for (var k = this.nColumns - 1; k >= 0; k--) {
+                for (var j = 0; j < nx; j++) {
                     // LU[k][k] != 0
                     X[k][j] /= this.LU[k][k];
                 }
-                for (int i = 0; i < k; i++) {
-                    for (int j = 0; j < nx; j++) {
+                for (var i = 0; i < k; i++) {
+                    for (var j = 0; j < nx; j++) {
                         X[i][j] -= X[k][j] * this.LU[i][k];
                     }
                 }
@@ -330,12 +330,12 @@ public class LUDecomposition implements ISolver, FunctionalMatrix, Serializable 
 
     /**
      * Returns the elements of the LUDecomposition
-     * @param i row index
-     * @param j column index
+     * @param r row index
+     * @param c column index
      * @return value
      */
-	@Override
-	public double get(final int i, final int j) {
-		return this.LU[i][j];
-	}
+    @Override
+    public double get(final int r, final int c) {
+        return this.LU[r][c];
+    }
 }

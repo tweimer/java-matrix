@@ -12,11 +12,11 @@ import java.util.function.IntToDoubleFunction;
  * @author Tobias Weimer
  *
  */
-public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix {
+public class DiagonalMatrix implements Serializable, Cloneable, SizedMatrix {
     private static final long serialVersionUID = 1L;
 
     /** array of the diagonal elements */
-    final double[] diag;
+    private final double[] diag;
 
     /**
      * Constructs a diagonal matrix
@@ -65,7 +65,7 @@ public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix
     public static DiagonalMatrix identity(final int size) {
         final var d = new DiagonalMatrix(size);
         for (var i = 0; i < size; i++) {
-            d.set(i, 1D);
+            d.set(i, 1.0);
         }
         return d;
     }
@@ -85,18 +85,18 @@ public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix
     /**
      * Get the element at position (i,j).
      *
-     * @param i row index
-     * @param j column index
+     * @param r row index
+     * @param c column index
      * @return Iff {@code i == j}, the corresponding diagonal element is returned,
      *         otherwise 0
      * @throws ArrayIndexOutOfBoundsException Iff any index is invalid
      * @see #get(int)
      */
     @Override
-    public double get(final int i, final int j) {
-        checkRange(i);
-        checkRange(j);
-        return i == j ? diag[i] : 0D;
+    public double get(final int r, final int c) {
+        checkRange(r);
+        checkRange(c);
+        return r == c ? diag[r] : 0D;
     }
 
     /**
@@ -119,6 +119,26 @@ public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix
      */
     public int getSize() {
         return diag.length;
+    }
+
+    @Override
+    public int getRowDimension() {
+        return diag.length;
+    }
+
+    @Override
+    public int getColumnDimension() {
+        return diag.length;
+    }
+    
+    @Override
+    public double[][] getArrayCopy() {
+        final var size = diag.length;
+        final var C = new double[size][size];
+        for (var i = 0; i < size; i++) {
+            C[i][i] = diag[i];
+        }
+        return C;
     }
 
     /**
@@ -161,15 +181,16 @@ public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix
      * Multiply a matrix by a scalar, C = s*A.
      *
      * @param s scalar
-     * @return new Matrix s*A
+     * @return Returns a new DiagonalMatrix s*A
      */
+    @Override
     public DiagonalMatrix times(final double s) {
-        final var D2 = new DiagonalMatrix(diag.length);
+        final var d2 = new DiagonalMatrix(diag.length);
         // Just multiply the diagonal values
         for (var i = 0; i < diag.length; i++) {
-            D2.set(i, s * get(i));
+            d2.diag[i] = s * diag[i];
         }
-        return D2;
+        return d2;
     }
 
     /**
@@ -186,58 +207,88 @@ public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix
     /**
      * C = A + B.
      *
-     * @param D another matrix
+     * @param d another matrix
      * @return new DiagonalMatrix A + B
      * @see #plusEquals
      */
-    public DiagonalMatrix plus(final DiagonalMatrix D) {
-        checkMatrixDimensions(D);
-        final var D2 = new DiagonalMatrix(diag.length);
+    public DiagonalMatrix plus(final DiagonalMatrix d) {
+        checkMatrixDimensions(d);
+        final var d2 = new DiagonalMatrix(diag.length);
         for (var i = 0; i < diag.length; i++) {
-            D2.diag[i] = this.diag[i] + D.diag[i];
+            d2.diag[i] = this.diag[i] + d.diag[i];
         }
-        return D2;
+        return d2;
+    }
+    
+    
+
+    /**
+     * 
+     * @return
+     *   This returns this matrix itsself (it is not copied)
+     */
+    @Override
+    public DiagonalMatrix transpose() {
+        return this;
+    }
+
+    /**
+     * @return
+     *  Always {@code true}
+     */
+    @Override
+    public boolean isSquare() {
+        return true;
+    }
+    
+    @Override
+    public FunctionalMatrix uminus() {
+        final var d2 = new DiagonalMatrix(diag.length);
+        for (var i = 0; i < diag.length; i++) {
+            d2.diag[i] = -this.diag[i];
+        }
+        return d2;
     }
 
     /**
      * A = A + B.
      *
-     * @param D another diagonal matrix
+     * @param d another diagonal matrix
      * @see #plus
      */
-    public void plusEquals(final DiagonalMatrix D) {
-        checkMatrixDimensions(D);
+    public void plusEquals(final DiagonalMatrix d) {
+        checkMatrixDimensions(d);
         for (var i = 0; i < diag.length; i++) {
-            diag[i] += D.diag[i];
+            diag[i] += d.diag[i];
         }
     }
 
     /**
      * C = A - B.
      *
-     * @param B another matrix
-     * @return new Matrix A - B
+     * @param d another diagonal matrix
+     * @return new DiagonalMatrix A - B
      * @see #minusEquals
      */
-    public DiagonalMatrix minus(final DiagonalMatrix D) {
-        checkMatrixDimensions(D);
-        final var D2 = new DiagonalMatrix(diag.length);
+    public DiagonalMatrix minus(final DiagonalMatrix d) {
+        checkMatrixDimensions(d);
+        final var d2 = new DiagonalMatrix(diag.length);
         for (var i = 0; i < diag.length; i++) {
-            D2.diag[i] = this.diag[i] - D.diag[i];
+            d2.diag[i] = this.diag[i] - d.diag[i];
         }
-        return D2;
+        return d2;
     }
 
     /**
      * A = A - B.
      *
-     * @param B another matrix
+     * @param d another diagonal matrix
      * @see #minus
      */
-    public void minusEquals(final DiagonalMatrix D) {
-        checkMatrixDimensions(D);
+    public void minusEquals(final DiagonalMatrix d) {
+        checkMatrixDimensions(d);
         for (var i = 0; i < diag.length; i++) {
-            diag[i] -= D.diag[i];
+            diag[i] -= d.diag[i];
         }
     }
 
@@ -250,11 +301,11 @@ public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix
      * @see #transformEquals(DoubleUnaryOperator)
      */
     public DiagonalMatrix transform(final DoubleUnaryOperator operator) {
-        final var D = new DiagonalMatrix(diag.length);
+        final var d = new DiagonalMatrix(diag.length);
         for (var i = 0; i < diag.length; i++) {
-            D.diag[i] = operator.applyAsDouble(diag[i]);
+            d.diag[i] = operator.applyAsDouble(diag[i]);
         }
-        return D;
+        return d;
     }
 
     /**
@@ -273,19 +324,19 @@ public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix
     /**
      * Applies the given operator to all elements, returning a new Matrix.
      *
-     * @param D  another diagonal Matrix
+     * @param d another diagonal Matrix
      * @param operator Operator to be applied
      * @return new Matrix with the result
      * @throws NullPointerException iff operator == null
      * @see #transformEquals(Matrix, DoubleBinaryOperator)
      */
-    public DiagonalMatrix transform(final DiagonalMatrix D, final DoubleBinaryOperator operator) {
-        checkMatrixDimensions(D);
-        final var D2 = new DiagonalMatrix(diag.length);
+    public DiagonalMatrix transform(final DiagonalMatrix d, final DoubleBinaryOperator operator) {
+        checkMatrixDimensions(d);
+        final var d2 = new DiagonalMatrix(diag.length);
         for (var i = 0; i < diag.length; i++) {
-            D2.diag[i] = operator.applyAsDouble(diag[i], D.diag[i]);
+            d2.diag[i] = operator.applyAsDouble(diag[i], d.diag[i]);
         }
-        return D2;
+        return d2;
     }
 
     /**
@@ -333,7 +384,7 @@ public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix
         // We just have to inverse the diagonal entries
         for (var i = 0; i < diag.length; i++) {
             // Throws ArithmeticException iff diag[i] == 0D
-            D2.diag[i] = 1d / diag[i];
+            D2.diag[i] = 1.0 / diag[i];
         }
         return D2;
     }
@@ -352,13 +403,15 @@ public class DiagonalMatrix implements Serializable, Cloneable, FunctionalMatrix
     }
 
     /**
-     * Returns the determinant. The determinant can be computed by multiplying all
+     * Returns the determinant.
+     * 
+     * The determinant can be computed by multiplying all
      * diagonal items.
      *
      * @return determinant
      */
     public double det() {
-        var det = 1D;
+        var det = 1.0;
         for (final var d : diag) {
             det *= d;
         }

@@ -73,7 +73,7 @@ public class SingularValueDecomposition implements Serializable {
      * @param Arg Rectangular matrix
      * @see Matrix#svd()
      */
-    SingularValueDecomposition(final Matrix Arg) {
+    SingularValueDecomposition(final SizedMatrix Arg) {
         // Derived from LINPACK code.
         // Initialize.
         final var A = Arg.getArrayCopy();
