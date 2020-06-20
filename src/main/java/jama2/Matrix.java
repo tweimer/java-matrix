@@ -308,18 +308,44 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
      *             Array length must be a multiple of m.
      */
     public Matrix(final double[] vals, final int m) {
-        this.n = m != 0 ? vals.length / m : 0;
-        if (m * this.n != vals.length) {
+        n = m != 0 ? vals.length / m : 0;
+        if (m * n != vals.length) {
             throw new IllegalArgumentException("Array length must be a multiple of m."); //$NON-NLS-1$
         } else {
-            this.A = new double[this.m = m][this.n];
-            for (var i = 0; i < this.A.length; i++) {
-                for (var j = 0; j < this.A[i].length; j++) {
-                    this.A[i][j] = vals[i + j * m];
+            A = new double[this.m = m][n];
+            for (var i = 0; i < m; i++) {
+                for (var j = 0; j < n; j++) {
+                    A[i][j] = vals[i + j * m];
                 }
             }
         }
     }
+    
+    /**
+     * Construct a matrix from a one-dimensional packed array.
+     *
+     * @param m
+     *            Number of rows.
+     * @param vals
+     *            One-dimensional array of doubles, packed by rows.
+     * @throws IllegalArgumentException
+     *             Array length must be a multiple of m.
+     */
+    public Matrix(final int m, final double... vals) {
+        n = m != 0 ? vals.length / m : 0;
+        if (m * n != vals.length) {
+            throw new IllegalArgumentException("Array length must be a multiple of m."); //$NON-NLS-1$
+        } else {
+            A = new double[this.m = m][n];
+            for (var i = 0; i < m; i++) {
+                for (var j = 0; j < n; j++) {
+                    A[i][j] = vals[i * n + j];
+                }
+            }
+        }
+    }
+    
+    
 
     /**
      * Construct a matrix from a 2-D array.
@@ -338,8 +364,8 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
         this(A.length, A[0].length, A);
 
         // check if each row has the same length
-        for (var r : this.A) {
-            if (r.length != this.n) {
+        for (var r : A) {
+            if (r.length != n) {
                 throw new IllegalArgumentException("All rows must have the same length."); //$NON-NLS-1$
             }
         }
