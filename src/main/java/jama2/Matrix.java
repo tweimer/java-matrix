@@ -336,11 +336,9 @@ public class Matrix implements FunctionalMatrix, Cloneable, Serializable {
         if (m * n != vals.length) {
             throw new IllegalArgumentException("Array length must be a multiple of m."); //$NON-NLS-1$
         } else {
-            A = new double[this.m = m][n];
+            A = new double[this.m = m][];
             for (var i = 0; i < m; i++) {
-                for (var j = 0; j < n; j++) {
-                    A[i][j] = vals[i * n + j];
-                }
+                 A[i] = Arrays.copyOfRange(vals, i * n, (i+1) * n);
             }
         }
     }
